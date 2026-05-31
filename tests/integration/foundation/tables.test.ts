@@ -10,9 +10,6 @@ describe('foundation tables', () => {
     const owner = await createTestUser()
     const service = serviceClient()
 
-    // Manually create profile (profile auto-create trigger comes in Task 9)
-    await service.from('profiles').insert({ id: owner.id, email: owner.email })
-
     const { data: household, error: hErr } = await service
       .from('households')
       .insert({ name: 'Test Home', owner_user_id: owner.id })
