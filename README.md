@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Home
 
-## Getting Started
+Shared home management app for couples. PWA built with Next.js 16, Supabase, and Google Drive integration.
 
-First, run the development server:
+## Prerequisites
+
+- Node.js ≥20
+- Docker Desktop (running, required for local Supabase)
+- Supabase CLI: bundled as a dev dependency (use via `npx supabase …`)
+
+## First-time setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start local Supabase (one-time pull of Docker images, then ~5s):
+   ```bash
+   npx supabase start
+   ```
+
+3. Copy the printed `anon key` and `service_role key` into `.env.local`:
+   ```bash
+   cp .env.local.example .env.local
+   # then edit .env.local with the values from `supabase start`
+   ```
+
+4. Apply database migrations:
+   ```bash
+   npx supabase migration up
+   ```
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev               # Next.js dev server at http://localhost:3000
+npx supabase status       # show local Supabase URLs and keys
+npx supabase stop         # stop local containers (preserves data)
+npx supabase db reset     # drop + recreate local DB, re-apply migrations + seed
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Supabase Studio (local DB UI): http://localhost:54323
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test                  # run all tests once
+npm run test:watch        # watch mode
+```
 
-## Learn More
+Integration tests run against the local Supabase instance. Make sure `supabase start` is running first.
 
-To learn more about Next.js, take a look at the following resources:
+## Project structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+/app                  Next.js App Router routes
+/components/ui        ShadCN primitives (restyled)
+/lib                  Shared utilities (supabase clients, env, etc.)
+/supabase/migrations  Database schema, applied in numbered order
+/tests                Vitest test suite
+/docs/superpowers     Design specs and implementation plans
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Theme
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Warm/cozy palette: terracotta (#C77B5C), sage (#7A9B7A), cream (#FAF6EF). Headings: Fraunces (serif). Body: Inter (sans).
