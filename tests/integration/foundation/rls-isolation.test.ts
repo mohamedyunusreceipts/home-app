@@ -40,7 +40,7 @@ describe('RLS — foundation isolation', () => {
 
   it('user in household A cannot see household B members', async () => {
     const a = await makeHousehold('A')
-    const b = await makeHousehold('B')
+    await makeHousehold('B')
 
     const aClient = await authedClient(a.owner.email, a.owner.password)
     const { data } = await aClient.from('household_members').select('*')
@@ -83,7 +83,7 @@ describe('RLS — foundation isolation', () => {
 
   it('any authenticated user can read their own profile only', async () => {
     const a = await makeHousehold('A')
-    const b = await makeHousehold('B')
+    await makeHousehold('B')
 
     const aClient = await authedClient(a.owner.email, a.owner.password)
     const { data } = await aClient.from('profiles').select('*')

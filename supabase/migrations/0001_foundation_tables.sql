@@ -17,6 +17,7 @@ create table public.households (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   owner_user_id uuid not null references public.profiles(id) on delete restrict,
+  -- TODO Plan 03: encrypt at rest with AES-256-GCM; key from DRIVE_TOKEN_ENCRYPTION_KEY env var.
   drive_refresh_token_encrypted bytea,
   drive_root_folder_id text,
   currency text not null default 'ZAR',

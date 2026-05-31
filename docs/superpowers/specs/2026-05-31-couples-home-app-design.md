@@ -17,7 +17,7 @@ The app covers seven feature areas — Money, Food & Groceries, Home Management,
 | # | Decision | Choice |
 |---|---|---|
 | 1 | Platform | PWA (installable, push-capable web app) |
-| 2 | Tech stack | Next.js 15 (App Router) + TypeScript + Tailwind + ShadCN/UI; Supabase (Postgres + Auth + RLS + Edge Functions); Vercel hosting |
+| 2 | Tech stack | Next.js 16 (App Router) + TypeScript + Tailwind + ShadCN/UI; Supabase (Postgres + Auth + RLS + Edge Functions); Vercel hosting |
 | 3 | Sign-in | Google OAuth only (covers Drive scope in one consent) |
 | 4 | Storage model | Household *owner's* Google Drive holds all files; partner does not need Drive scope |
 | 5 | Joining a household | Single-use invite link (`/join/<token>`, 24-hour expiry) |
@@ -36,10 +36,12 @@ The app covers seven feature areas — Money, Food & Groceries, Home Management,
 | 18 | Supabase account | `mohamedyunusreceipts@gmail.com` |
 | 19 | Vercel account | Personal account (NOT NUtec / `nutecdigital.com` work account — this is a personal project) |
 
+> _Plan 01 execution note: `create-next-app@latest` shipped Next.js 16 by the time this plan ran; minor breaking changes (e.g. `middleware` file convention → `proxy`) have been adopted accordingly._
+
 ## 3. Architecture
 
 ### 3.1 Stack
-- **Frontend:** Next.js 15 App Router, TypeScript strict, Tailwind CSS, ShadCN/UI primitives restyled to the warm/cozy palette.
+- **Frontend:** Next.js 16 App Router, TypeScript strict, Tailwind CSS, ShadCN/UI primitives restyled to the warm/cozy palette.
 - **Backend:** Supabase (managed Postgres + Auth + Realtime + Edge Functions). `pg_cron` extension for scheduled jobs.
 - **Storage:** Google Drive (owner's account) for all binary files. Supabase Storage is **not** used.
 - **AI:** Anthropic API (Claude Haiku) for suggest features and receipt OCR; server-side only.

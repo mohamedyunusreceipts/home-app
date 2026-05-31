@@ -21,6 +21,9 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+      - name: Lint
+        run: npm run lint
+
       - name: Start Supabase
         run: npx supabase start
 
@@ -35,3 +38,6 @@ jobs:
           echo "SUPABASE_SERVICE_ROLE_KEY=$(echo "$status" | jq -r .SERVICE_ROLE_KEY)" >> .env.local
 
       - run: npm test
+
+      - name: Build
+        run: npm run build
