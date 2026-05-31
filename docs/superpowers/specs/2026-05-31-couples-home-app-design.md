@@ -149,7 +149,7 @@ getThumbnail(driveFileId, size) → URL
   /Money/{Receipts,Bills}/
   /Food/RecipePhotos/
   /Home/{MaintenanceDocs,HomeProjects}/
-  /Travel/<TripName>/
+  /Travel/<TripId>-<TripNameSlug>/
   /Wardrobe/<UserId>/
   /Calendar/Attachments/
 ```
@@ -232,7 +232,7 @@ Notation: tables listed by name only — all carry `household_id` and standard t
 
 ### 9.3 Home Management
 - **Tabs:** Chores · Cleaning schedule · Maintenance reminders · Home projects · Shared lists · Shopping links
-- **Tables:** `chores` (name, assignee_user_id|null, recurrence_rrule, next_due, last_done_at, last_done_by), `cleaning_tasks` (same shape; separated for UX), `maintenance_reminders` (item, next_due, recurrence_rrule, notes, attachment_drive_file_id), `home_projects` (name, status, budget, notes_md, photo_drive_file_ids[]), `shared_lists` (name, items jsonb), `shopping_links` (label, url, category, notes)
+- **Tables:** `chores` (name, assignee_user_id|null, recurrence_rrule, next_due, last_done_at, last_done_by), `cleaning_tasks` (same columns as `chores`; separated as a distinct table so the Chores tab and Cleaning Schedule tab can be queried, scoped, and styled independently without a discriminator column — keeps simple queries simple), `maintenance_reminders` (item, next_due, recurrence_rrule, notes, attachment_drive_file_id), `home_projects` (name, status, budget, notes_md, photo_drive_file_ids[]), `shared_lists` (name, items jsonb), `shopping_links` (label, url, category, notes)
 - **Tick-off flow:** tap "done" stamps `last_done_at` / `last_done_by`, computes `next_due` via RRULE, fires "✓ Nice" toast (no push)
 - **Fairness view:** bar chart per chore tab showing chores completed per partner over last 30 days
 
@@ -246,7 +246,7 @@ Notation: tables listed by name only — all carry `household_id` and standard t
 ### 9.5 Travel & Packing
 - **Tabs:** Trip ideas · Trip budget · Itinerary · Packing list · Travel documents · Outfit packing plan · Shared travel notes
 - **Tables:** `trips` (name, destination, start, end, status ['idea'|'planning'|'booked'|'completed'], budget_total, cover_image_drive_file_id), `trip_itinerary_items` (trip_id, day, time?, title, location, notes, attachment_drive_file_id), `trip_expenses` (trip_id, date, amount, category, description, also_count_in_monthly_budget bool), `packing_lists` (trip_id, name), `packing_items` (list_id, name, packed_by_user_id?, packed), `trip_docs` (trip_id, kind ['passport'|'visa'|'ticket'|'booking'|'insurance'|'other'], drive_file_id, expiry_date?), `trip_notes` (trip_id, body_md), `trip_outfits` (trip_id, day, wardrobe_item_ids[])
-- **Drive folder:** on trip create, `/HomeApp/Travel/<TripName>/` created; all trip attachments live there
+- **Drive folder:** on trip create, `/HomeApp/Travel/<TripId>-<TripNameSlug>/` created (ID prefix prevents collisions on duplicate trip names); all trip attachments live there
 - **Outfit packing plan:** cross-module — assigning wardrobe items to trip days auto-adds the underlying clothes to packing list
 - **Countdown:** dashboard card uses `MIN(start) WHERE status IN ('planning','booked') AND start > now()`
 
@@ -264,6 +264,7 @@ Notation: tables listed by name only — all carry `household_id` and standard t
 - **Expiry tracking:** any row with `expiry_date` triggers reminders at 60/30/7 days before expiry; surfaces in dashboard maintenance card
 - **Gift ideas privacy:** RLS includes additional clause `AND (for_user_id IS NULL OR for_user_id != auth.uid())` — recipient cannot see gifts targeted at them
 - **Sensitive docs:** stored in Drive with native at-rest encryption only; no client-side encryption in v1
+- **"Sizes & preferences" tab:** reads from the same `wardrobe_preferences` table as the Wardrobe module. The `sizes jsonb` field accommodates both clothing (tops, bottoms, shoes) and non-clothing entries (ring size, watch band, etc.) as freeform keys. One source of truth, surfaced in two places
 
 ## 10. Consolidated data model summary
 
