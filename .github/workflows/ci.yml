@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Start Supabase
+        run: npx supabase start
+
+      - name: Apply migrations
+        run: npx supabase migration up
+
+      - name: Write test env vars
+        run: |
+          status=$(npx supabase status -o json)
+          echo "NEXT_PUBLIC_SUPABASE_URL=$(echo "$status" | jq -r .API_URL)" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(echo "$status" | jq -r .ANON_KEY)" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=$(echo "$status" | jq -r .SERVICE_ROLE_KEY)" >> .env.local
+
+      - run: npm test
