@@ -37,12 +37,32 @@ export async function authedClient(email: string, password: string): Promise<Sup
   return client
 }
 
+async function safeDelete(
+  fn: () => PromiseLike<{ error: { message?: string; code?: string } | null }>,
+): Promise<void> {
+  const { error } = await fn()
+  if (!error) return
+  // Tolerate missing tables — migrations may not have been applied yet.
+  const msg = error.message ?? ''
+  if (msg.includes('does not exist') || msg.includes('schema cache') || error.code === '42P01') {
+    return
+  }
+  throw new Error(`resetDatabase delete failed: ${msg}`)
+}
+
 export async function resetDatabase(): Promise<void> {
   const service = serviceClient()
-  // Order matters: invites → household_members → households → auth.users
-  await service.from('invites').delete().neq('token', '__never__')
-  await service.from('household_members').delete().neq('user_id', '00000000-0000-0000-0000-000000000000')
-  await service.from('households').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  // Order matters: invites → household_members → households → profiles → auth.users
+  await safeDelete(() => service.from('invites').delete().neq('token', '__never__'))
+  await safeDelete(() =>
+    service.from('household_members').delete().neq('user_id', '00000000-0000-0000-0000-000000000000'),
+  )
+  await safeDelete(() =>
+    service.from('households').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+  )
+  await safeDelete(() =>
+    service.from('profiles').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+  )
   const { data: users } = await service.auth.admin.listUsers()
   for (const user of users?.users ?? []) {
     await service.auth.admin.deleteUser(user.id)
