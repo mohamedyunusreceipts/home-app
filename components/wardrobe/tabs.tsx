@@ -1,17 +1,21 @@
 import Link from 'next/link'
 
 /**
- * Wardrobe tab bar (spec §9.6 tabs). Server component — the caller passes the
- * currently active href so the active tab is highlighted.
+ * Wardrobe chip tab row (Focus Timeline redesign, README §7).
+ *
+ * Four chips — Items / Outfits / Laundry / Packing — wired to the existing
+ * wardrobe sub-routes. Active chip = sage #7A9B7A / white; inactive chips =
+ * #F1F5F1 / #5F8160. The caller passes the active href so the right chip lights.
+ *
+ * (The remaining wardrobe surfaces — partner, occasions, preferences — are
+ * still reachable via their routes; only the four primary chips are shown here
+ * to match the redesign.)
  */
 const TABS: { href: string; label: string }[] = [
-  { href: '/wardrobe', label: 'My wardrobe' },
-  { href: '/wardrobe/partner', label: 'Partner wardrobe' },
-  { href: '/wardrobe/generator', label: 'Outfit generator' },
-  { href: '/wardrobe/occasions', label: 'Occasion outfits' },
-  { href: '/wardrobe/laundry', label: 'Laundry-aware' },
-  { href: '/wardrobe/packing', label: 'Packing outfits' },
-  { href: '/wardrobe/preferences', label: 'Sizes & preferences' },
+  { href: '/wardrobe', label: 'Items' },
+  { href: '/wardrobe/generator', label: 'Outfits' },
+  { href: '/wardrobe/laundry', label: 'Laundry' },
+  { href: '/wardrobe/packing', label: 'Packing' },
 ]
 
 export function WardrobeTabs({ active }: { active: string }) {
@@ -24,10 +28,11 @@ export function WardrobeTabs({ active }: { active: string }) {
             key={tab.href}
             href={tab.href}
             aria-current={isActive ? 'page' : undefined}
-            className={
+            className="rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
+            style={
               isActive
-                ? 'rounded-full bg-terracotta-600 px-3 py-1.5 text-sm font-medium text-cream-50'
-                : 'rounded-full border border-sage-300 px-3 py-1.5 text-sm font-medium text-sage-700 hover:bg-sage-100'
+                ? { background: '#7A9B7A', color: '#FFFFFF' }
+                : { background: '#F1F5F1', color: '#5F8160' }
             }
           >
             {tab.label}
