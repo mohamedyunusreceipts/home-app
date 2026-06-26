@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { requireHousehold } from '@/lib/auth/redirects'
 import { createClient } from '@/lib/supabase/server'
@@ -66,6 +67,22 @@ export default async function FoodMealPlanPage() {
             <MealPlanGrid weekStart={weekStart} dates={dates} recipes={recipes} plan={plan} />
           </CardContent>
         </Card>
+
+        <Link href="/food/catalogue" className="block">
+          <Card className="transition hover:ring-terracotta-300">
+            <CardHeader>
+              <CardTitle className="font-serif text-terracotta-700">
+                Meals &amp; desserts catalogue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sage-700">
+                Your curated list of dishes and desserts you love — add what you like, remove
+                what you don&apos;t.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </main>
   )
