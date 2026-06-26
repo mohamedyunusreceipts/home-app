@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { requireHousehold } from '@/lib/auth/redirects'
 import { createClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
-import { MonthView } from '@/components/calendar/month-view'
+import { ScreenHeader } from '@/components/shell/screen-header'
+import { FocusTimeline } from '@/components/calendar/focus-timeline'
 import type { CalendarEventRow } from '@/components/calendar/types'
 
 export default async function CalendarPage() {
@@ -30,25 +30,28 @@ export default async function CalendarPage() {
   const month = Number(parts[1])
 
   return (
-    <main className="min-h-screen p-4 sm:p-8">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-serif text-3xl text-terracotta-700">Calendar</h1>
-          <div className="flex gap-2">
-            <Link href="/calendar/birthdays">
-              <Button variant="outline" size="sm">
-                Birthdays
-              </Button>
+    <main className="px-[22px] pt-2 pb-[120px]">
+      <div className="mx-auto max-w-xl">
+        <ScreenHeader
+          title="Calendar"
+          action={
+            <Link
+              href="/calendar/birthdays"
+              className="inline-flex items-center rounded-full font-semibold transition-colors"
+              style={{
+                border: '1px solid #E8DFCE',
+                background: '#FFFDF9',
+                padding: '7px 16px',
+                fontSize: 13,
+                color: '#793F2D',
+              }}
+            >
+              Birthdays
             </Link>
-            <Link href="/calendar/settings">
-              <Button variant="outline" size="sm">
-                Feed &amp; settings
-              </Button>
-            </Link>
-          </div>
-        </header>
+          }
+        />
 
-        <MonthView rows={rows ?? []} initialYear={year} initialMonth={month} />
+        <FocusTimeline rows={rows ?? []} year={year} month={month} />
       </div>
     </main>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useShell } from './shell-context'
 
 /**
  * Enable / disable Web Push for the current device.
@@ -40,7 +40,7 @@ type PushState =
 export function PushToggle() {
   const [state, setState] = useState<PushState>('loading')
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const { showToast } = useShell()
 
   const supported =
     typeof window !== 'undefined' &&
@@ -73,10 +73,9 @@ export function PushToggle() {
   }, [supported])
 
   const enable = useCallback(async () => {
-    setMessage(null)
     const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
     if (!vapidKey) {
-      setMessage('Push is not configured on the server yet.')
+      showToast('Push is not configured yet.')
       return
     }
     setBusy(true)
@@ -84,7 +83,7 @@ export function PushToggle() {
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') {
         setState(permission === 'denied' ? 'denied' : 'unsubscribed')
-        setMessage('Notification permission was not granted.')
+        showToast('Notification permission was not granted.')
         return
       }
 
@@ -104,17 +103,16 @@ export function PushToggle() {
       }
 
       setState('subscribed')
-      setMessage('Browser push is on for this device.')
+      showToast('Browser push is on for this device.')
     } catch (err) {
       console.error('[push] enable failed:', err)
-      setMessage('Could not enable push. Please try again.')
+      showToast('Could not enable push. Please try again.')
     } finally {
       setBusy(false)
     }
-  }, [])
+  }, [showToast])
 
   const disable = useCallback(async () => {
-    setMessage(null)
     setBusy(true)
     try {
       const reg = await navigator.serviceWorker.ready
@@ -129,54 +127,62 @@ export function PushToggle() {
         })
       }
       setState('unsubscribed')
-      setMessage('Browser push is off for this device.')
+      showToast('Browser push is off for this device.')
     } catch (err) {
       console.error('[push] disable failed:', err)
-      setMessage('Could not disable push. Please try again.')
+      showToast('Could not disable push. Please try again.')
     } finally {
       setBusy(false)
     }
-  }, [])
+  }, [showToast])
+
+  // A controllable hardware-style switch matching the redesign: on = #7A9B7A
+  // track / knob right, off = #DBCFB7 track / knob left. Unsupported & denied
+  // states render a disabled-off switch; feedback is surfaced via the shell toast.
+  const isOn = state === 'subscribed'
+  const interactive = state === 'subscribed' || state === 'unsubscribed'
+  const toggle = isOn ? disable : enable
 
   return (
-    <div className="space-y-3">
-      {state === 'unsupported' && (
-        <p className="text-sm text-sage-600">
-          This browser does not support push notifications.
-        </p>
-      )}
+    <Switch
+      checked={isOn}
+      busy={busy || state === 'loading'}
+      disabled={!interactive}
+      onToggle={toggle}
+    />
+  )
+}
 
-      {state === 'denied' && (
-        <p className="text-sm text-sage-600">
-          Notifications are blocked. Enable them for this site in your browser
-          settings, then reload.
-        </p>
-      )}
-
-      {state === 'subscribed' && (
-        <Button variant="outline" size="sm" onClick={disable} disabled={busy}>
-          {busy ? 'Working…' : 'Disable browser push'}
-        </Button>
-      )}
-
-      {(state === 'unsubscribed' || state === 'loading') && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={enable}
-          disabled={busy || state === 'loading'}
-        >
-          {busy ? 'Working…' : 'Enable browser push'}
-        </Button>
-      )}
-
-      {message && <p className="text-sm text-sage-600">{message}</p>}
-
-      <p className="text-xs text-sage-500">
-        On iPhone or iPad, push works only after you add this app to your Home
-        Screen (Share &rarr; &ldquo;Add to Home Screen&rdquo;), and requires iOS
-        16.4 or later.
-      </p>
-    </div>
+/**
+ * The on/off track used by the Push notifications row. Kept inside this module
+ * so it stays paired with the push logic above (it has no other consumer yet).
+ */
+function Switch({
+  checked,
+  busy,
+  disabled,
+  onToggle,
+}: {
+  checked: boolean
+  busy: boolean
+  disabled: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label="Push notifications"
+      disabled={disabled || busy}
+      onClick={onToggle}
+      className="relative inline-flex h-[30px] w-[52px] shrink-0 items-center rounded-full px-[3px] transition-colors disabled:opacity-60"
+      style={{ backgroundColor: checked ? '#7A9B7A' : '#DBCFB7' }}
+    >
+      <span
+        className="h-[24px] w-[24px] rounded-full bg-white shadow-sm transition-transform"
+        style={{ transform: checked ? 'translateX(22px)' : 'translateX(0)' }}
+      />
+    </button>
   )
 }

@@ -1,18 +1,40 @@
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { ScreenHeader } from '@/components/shell/screen-header'
 import { requireHousehold } from '@/lib/auth/redirects'
 import { createClient } from '@/lib/supabase/server'
 import { availableRedraw, amortisationSchedule } from '@/lib/mortgage/engine'
-import { StatCard } from '@/components/mortgage/stat-card'
 import { BalanceChart, type BalancePoint } from '@/components/mortgage/balance-chart'
-import { formatZar, formatZarRounded, formatMonth } from '@/components/mortgage/format'
+import { formatZar, formatZarRounded } from '@/components/mortgage/format'
 import {
   toBondConfig,
   toMonthlyStatement,
   type MortgageRow,
   type StatementRow,
 } from '@/components/mortgage/map'
+
+/** Short "Jun 2026" style month label for the hero subtext (JHB locale). */
+const shortMonthFormatter = new Intl.DateTimeFormat('en-ZA', {
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'Africa/Johannesburg',
+})
+
+function shortMonth(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
+  return shortMonthFormatter.format(d)
+}
+
+/** Render whole-months ahead as a compact "3 yrs" / "8 mo" / "1 yr 2 mo" label. */
+function aheadLabel(months: number): string {
+  if (months <= 0) return 'On track'
+  const years = Math.floor(months / 12)
+  const rem = months % 12
+  if (years === 0) return `${rem} mo`
+  if (rem === 0) return `${years} ${years === 1 ? 'yr' : 'yrs'}`
+  return `${years} ${years === 1 ? 'yr' : 'yrs'} ${rem} mo`
+}
 
 export default async function MortgagePage() {
   const { householdId } = await requireHousehold()
@@ -26,29 +48,39 @@ export default async function MortgagePage() {
     .eq('household_id', householdId)
     .maybeSingle<MortgageRow>()
 
+  const editChip = (
+    <Link
+      href="/mortgage/setup"
+      className="inline-flex items-center rounded-full border border-cream-300 bg-cream-50 px-4 py-1.5 text-[13px] font-semibold text-sage-600 transition-colors hover:bg-cream-100"
+    >
+      Edit
+    </Link>
+  )
+
   // Warm empty state — no bond configured yet.
   if (!mortgage) {
     return (
-      <main className="min-h-screen p-8">
-        <div className="mx-auto max-w-2xl space-y-6">
-          <h1 className="font-serif text-3xl text-terracotta-700">Your bond</h1>
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif text-terracotta-700">
-                Let&apos;s set up your access bond
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sage-800">
-              <p>
-                Track what you&apos;ve paid down, how far ahead of schedule you are,
-                and how much you can redraw — all in one place. Start by capturing
-                your bond&apos;s details.
-              </p>
-              <Link href="/mortgage/setup">
-                <Button>Set up your bond</Button>
+      <main className="min-h-screen px-[22px] pt-2 pb-[120px]">
+        <div className="mx-auto max-w-2xl">
+          <ScreenHeader title="Bond" />
+          <div className="mt-6 rounded-[16px] border border-cream-300 bg-cream-50 px-[18px] py-8 text-center">
+            <p className="font-serif text-[18px] font-semibold text-terracotta-900">
+              Let&apos;s set up your access bond
+            </p>
+            <p className="mx-auto mt-2 max-w-sm text-[13px] text-[#8a7163]">
+              Track what you&apos;ve paid down, how far ahead of schedule you are, and
+              how much you can redraw — all in one place. Start by capturing your
+              bond&apos;s details.
+            </p>
+            <div className="mt-4 flex justify-center">
+              <Link
+                href="/mortgage/setup"
+                className="inline-flex items-center rounded-full bg-terracotta-400 px-4 py-2 text-[13px] font-semibold text-cream-50 shadow-sm transition-colors hover:bg-terracotta-500"
+              >
+                Set up your bond
               </Link>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </main>
     )
@@ -63,17 +95,6 @@ export default async function MortgagePage() {
     .order('statement_month', { ascending: true })
     .returns<StatementRow[]>()
 
-  const { data: txRows } = await supabase
-    .from('mortgage_transactions')
-    .select('amount, kind')
-    .eq('mortgage_id', mortgage.id)
-    .returns<{ amount: number; kind: 'extra_deposit' | 'withdrawal' }[]>()
-
-  const netExtraIn = (txRows ?? []).reduce(
-    (sum, t) => sum + (t.kind === 'extra_deposit' ? t.amount : -t.amount),
-    0,
-  )
-
   const rows = statementRows ?? []
   const config = toBondConfig(mortgage)
   const statements = rows.map(toMonthlyStatement)
@@ -83,8 +104,6 @@ export default async function MortgagePage() {
   const latestMonth = latest?.statement_month ?? config.startDate
   const redraw = latest ? availableRedraw(config, statements, latestMonth) : 0
   const currentBalance = latest?.closing_balance ?? config.originalPrincipal
-  const totalPaid = rows.reduce((sum, r) => sum + (r.total_paid ?? 0), 0)
-  const totalInterest = rows.reduce((sum, r) => sum + r.interest_charged, 0)
   const principalPaidDown = config.originalPrincipal - currentBalance
 
   // Months ahead of schedule: compare the original amortisation balance for the
@@ -116,106 +135,125 @@ export default async function MortgagePage() {
     shadow: schedule[i]?.closingBalance ?? config.originalPrincipal,
   }))
 
+  const lenderLine = [mortgage.lender, latest ? `as at ${shortMonth(latestMonth)}` : null]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
-    <main className="min-h-screen p-8">
-      <div className="mx-auto max-w-3xl space-y-6">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="font-serif text-3xl text-terracotta-700">Your bond</h1>
-            {mortgage.lender && (
-              <p className="text-sage-600">
-                {mortgage.lender}
-                {mortgage.account_ref ? ` · ${mortgage.account_ref}` : ''}
-              </p>
-            )}
+    <main className="min-h-screen px-[22px] pt-2 pb-[120px]">
+      <div className="mx-auto max-w-2xl">
+        <ScreenHeader title="Bond" action={editChip} />
+
+        {/* Redraw hero — terracotta, white. */}
+        <section className="rounded-[22px] bg-[#C77B5C] p-[18px] text-cream-50">
+          <p className="text-[11px] font-semibold tracking-[0.07em] text-cream-50/85 uppercase">
+            Available to redraw
+          </p>
+          <p className="mt-2 font-serif text-[42px] leading-none font-semibold">
+            {formatZarRounded(redraw)}
+          </p>
+          <p className="mt-2 text-[13px] text-cream-50/90">
+            {latest ? lenderLine : 'Add a statement to calculate your redraw'}
+          </p>
+        </section>
+
+        {/* Two stat tiles. */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="rounded-[16px] border border-cream-300 bg-cream-50 px-[18px] py-4">
+            <p className="text-[11px] font-semibold tracking-[0.07em] text-sage-500 uppercase">
+              Outstanding
+            </p>
+            <p className="mt-1 font-serif text-[22px] font-semibold text-terracotta-900">
+              {formatZar(currentBalance)}
+            </p>
           </div>
-          <Link href="/mortgage/setup">
-            <Button variant="outline">Edit bond</Button>
-          </Link>
-        </header>
-
-        {/* Headline — available to redraw. */}
-        <StatCard
-          label="Available to redraw"
-          value={formatZarRounded(redraw)}
-          hint={
-            latest
-              ? `As at ${formatMonth(latestMonth)}`
-              : 'Add a statement to calculate your redraw'
-          }
-          emphasis
-        />
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <StatCard
-            label="Outstanding balance"
-            value={formatZar(currentBalance)}
-            hint={latest ? `As at ${formatMonth(latestMonth)}` : 'Opening balance'}
-          />
-          <StatCard
-            label="Principal paid down"
-            value={formatZar(principalPaidDown)}
-            hint={`of ${formatZarRounded(config.originalPrincipal)} original`}
-          />
-          <StatCard
-            label="Total paid in"
-            value={formatZar(totalPaid)}
-            hint="Across all captured statements"
-          />
-          <StatCard
-            label="Total interest charged"
-            value={formatZar(totalInterest)}
-            hint="Across all captured statements"
-          />
+          <div className="rounded-[16px] border border-cream-300 bg-cream-50 px-[18px] py-4">
+            <p className="text-[11px] font-semibold tracking-[0.07em] text-sage-500 uppercase">
+              Paid down
+            </p>
+            <p className="mt-1 font-serif text-[22px] font-semibold text-terracotta-900">
+              {formatZar(principalPaidDown)}
+            </p>
+          </div>
         </div>
 
-        <StatCard
-          label="Ahead of schedule"
-          value={
-            monthsAhead > 0
-              ? `${monthsAhead} ${monthsAhead === 1 ? 'month' : 'months'}`
-              : 'On track'
-          }
-          hint={
-            monthsAhead > 0
-              ? 'Paying down faster than the original plan'
-              : 'Keep adding extra to get ahead'
-          }
-        />
+        {/* Ahead-of-schedule strip. */}
+        <section className="mt-3 flex items-center justify-between gap-4 rounded-[16px] border border-[#DCE7DC] bg-[#F1F5F1] px-[18px] py-4">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold tracking-[0.07em] text-sage-500 uppercase">
+              Ahead of schedule
+            </p>
+            <p className="mt-0.5 text-[13px] text-sage-600">
+              {monthsAhead > 0
+                ? 'Paying down faster than plan'
+                : 'Keep adding extra to get ahead'}
+            </p>
+          </div>
+          <p className="shrink-0 font-serif text-[26px] font-semibold text-[#3B523C]">
+            {aheadLabel(monthsAhead)}
+          </p>
+        </section>
 
-        <Link href="/mortgage/transactions" className="block">
-          <StatCard
-            label="Contributions"
-            value={formatZar(netExtraIn)}
-            hint="Net extra paid in — tap to log deposits & withdrawals"
-          />
-        </Link>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-serif text-terracotta-700">
-              Balance vs original schedule
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Balance vs schedule card. */}
+        <section className="mt-3 rounded-[20px] border border-cream-300 bg-cream-50 p-[18px]">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-[11px] font-semibold tracking-[0.07em] text-sage-500 uppercase">
+              Balance vs schedule
+            </h2>
+            <div className="flex items-center gap-3 text-[11px] font-medium text-sage-600">
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#95B695]"
+                  aria-hidden
+                />
+                Actual
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#DBCFB7]"
+                  aria-hidden
+                />
+                Plan
+              </span>
+            </div>
+          </div>
+          <div className="mt-4">
             <BalanceChart points={chartPoints} />
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        <div className="flex flex-wrap gap-3">
-          <Link href="/mortgage/statements">
-            <Button variant="outline">Statements</Button>
-          </Link>
-          <Link href="/mortgage/transactions">
-            <Button variant="outline">Contributions</Button>
-          </Link>
-          <Link href="/mortgage/calculators">
-            <Button variant="outline">Calculators</Button>
-          </Link>
-          <Link href="/mortgage/setup">
-            <Button variant="outline">Bond setup</Button>
-          </Link>
-        </div>
+        {/* Sub-navigation. */}
+        <nav className="mt-3 space-y-2">
+          {[
+            { href: '/mortgage/statements', label: 'Statements' },
+            { href: '/mortgage/transactions', label: 'Contributions' },
+            { href: '/mortgage/calculators', label: 'Calculators' },
+            { href: '/mortgage/setup', label: 'Bond setup' },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center justify-between gap-4 rounded-[16px] border border-cream-300 bg-cream-50 px-[18px] py-[14px] transition-colors hover:bg-cream-100"
+            >
+              <span className="text-[15px] font-semibold text-terracotta-900">
+                {item.label}
+              </span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#C8B79C"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </Link>
+          ))}
+        </nav>
       </div>
     </main>
   )

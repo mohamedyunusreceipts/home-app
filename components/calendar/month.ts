@@ -125,6 +125,167 @@ export function monthLabel(year: number, month: number): string {
   return `${MONTH_NAMES[month - 1]} ${year}`
 }
 
+// ── Focus Timeline week strip + agenda grouping ──────────────────────────────
+
+const TODAY_FMT = new Intl.DateTimeFormat('en-CA', {
+  timeZone: TZ,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
+const DOW_SHORT = new Intl.DateTimeFormat('en-ZA', {
+  timeZone: TZ,
+  weekday: 'short',
+})
+
+/** Today's local 'YYYY-MM-DD' key (app timezone). */
+export function todayKey(now: Date = new Date()): string {
+  return TODAY_FMT.format(now)
+}
+
+/** "JUNE 2026" — uppercase month+year for the agenda header. */
+export function monthLabelUpper(year: number, month: number): string {
+  return `${MONTH_NAMES[month - 1]!.toUpperCase()} ${year}`
+}
+
+export interface WeekStripDay {
+  /** 'YYYY-MM-DD' key. */
+  key: string
+  /** Day-of-month number (1–31). */
+  day: number
+  /** Single-letter weekday header (M T W T F S S). */
+  weekdayLetter: string
+  /** True when this is today (app timezone). */
+  isToday: boolean
+  /** True when any (filtered) event falls on this day. */
+  hasEvents: boolean
+  /** True when a special event (birthday) falls on this day. */
+  special: boolean
+}
+
+const WEEKDAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+
+/**
+ * The Monday–Sunday week containing `todayKey`, as 7 day cells. `byDay` buckets
+ * (from bucketByDay) drive the per-day event dot; a birthday on a day marks it
+ * special (terracotta dot) rather than normal (sage).
+ */
+export function buildWeekStrip(
+  byDay: Map<string, CalendarEventRow[]>,
+  today: string = todayKey(),
+): WeekStripDay[] {
+  const [ty, tm, td] = today.split('-').map(Number)
+  const base = new Date(Date.UTC(ty!, tm! - 1, td!))
+  // Monday-start offset: JS getUTCDay 0=Sun..6=Sat → Mon=0..Sun=6.
+  const offset = (base.getUTCDay() + 6) % 7
+  const monday = new Date(base)
+  monday.setUTCDate(base.getUTCDate() - offset)
+
+  const cells: WeekStripDay[] = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday)
+    d.setUTCDate(monday.getUTCDate() + i)
+    const y = d.getUTCFullYear()
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0')
+    const dd = String(d.getUTCDate()).padStart(2, '0')
+    const key = `${y}-${m}-${dd}`
+    const events = byDay.get(key) ?? []
+    cells.push({
+      key,
+      day: d.getUTCDate(),
+      weekdayLetter: WEEKDAY_LETTERS[i]!,
+      isToday: key === today,
+      hasEvents: events.length > 0,
+      special: events.some((e) => e.category === 'birthdays'),
+    })
+  }
+  return cells
+}
+
+export interface AgendaDay {
+  /** 'YYYY-MM-DD' key. */
+  key: string
+  /** Header label, e.g. "TUE 26". */
+  label: string
+  /** Short title-case weekday, e.g. "Wed" — used as a row prefix. */
+  dow: string
+  /** Events on this day, time-sorted (all-day first). */
+  events: CalendarEventRow[]
+}
+
+/** "TUE 26" header for a day key (uppercase short weekday + day-of-month). */
+function agendaDayLabel(key: string): string {
+  const [y, m, d] = key.split('-').map(Number)
+  const date = new Date(Date.UTC(y!, m! - 1, d!))
+  return `${DOW_SHORT.format(date).toUpperCase()} ${d}`
+}
+
+/** "Wed" — short title-case weekday for a day key. */
+function dowOf(key: string): string {
+  const [y, m, d] = key.split('-').map(Number)
+  const date = new Date(Date.UTC(y!, m! - 1, d!))
+  return DOW_SHORT.format(date)
+}
+
+/** Minutes-since-midnight (app timezone) for an ISO timestamp; all-day → -1. */
+function startMinutes(row: CalendarEventRow): number {
+  if (row.all_day) return -1
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: TZ,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date(row.start))
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? '0')
+  const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? '0')
+  return hour * 60 + minute
+}
+
+/** "HH:MM" start label (app timezone). */
+export function timeLabelOf(row: CalendarEventRow): string {
+  if (row.all_day) return 'All day'
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: TZ,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date(row.start))
+}
+
+/**
+ * Group buckets into agenda days from `today` through the end of today's
+ * Mon–Sun week (inclusive). Empty days are dropped. The first returned day is
+ * today (even if it has no events, so the agenda can show "TODAY ·" with an
+ * empty state). Each day's events are time-sorted, all-day first.
+ */
+export function buildAgenda(
+  byDay: Map<string, CalendarEventRow[]>,
+  today: string = todayKey(),
+): AgendaDay[] {
+  const [ty, tm, td] = today.split('-').map(Number)
+  const base = new Date(Date.UTC(ty!, tm! - 1, td!))
+  const offset = (base.getUTCDay() + 6) % 7
+  const daysLeftInWeek = 6 - offset // through Sunday
+
+  const out: AgendaDay[] = []
+  for (let i = 0; i <= daysLeftInWeek; i++) {
+    const d = new Date(base)
+    d.setUTCDate(base.getUTCDate() + i)
+    const y = d.getUTCFullYear()
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0')
+    const dd = String(d.getUTCDate()).padStart(2, '0')
+    const key = `${y}-${m}-${dd}`
+    const events = (byDay.get(key) ?? [])
+      .slice()
+      .sort((a, b) => startMinutes(a) - startMinutes(b))
+    if (i === 0 || events.length > 0) {
+      out.push({ key, label: agendaDayLabel(key), dow: dowOf(key), events })
+    }
+  }
+  return out
+}
+
 /** Step a 1-based {year, month} by ±1 month, rolling the year over. */
 export function stepMonth(
   year: number,

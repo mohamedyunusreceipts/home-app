@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { requireHousehold } from '@/lib/auth/redirects'
 import { createClient } from '@/lib/supabase/server'
-import { StatCard } from '@/components/money/stat-card'
-import { formatZar, formatZarRounded, formatMonth, currentMonthKey } from '@/components/money/format'
-import { budgetProgress, anyBudgetWarning } from '@/components/money/budget'
+import { SettleUpButton } from '@/components/money/settle-up-button'
+import { ScreenHeader } from '@/components/shell/screen-header'
+import { formatZar, formatZarRounded, currentMonthKey } from '@/components/money/format'
+import { budgetProgress } from '@/components/money/budget'
 import { computeWhoOwesWho } from '@/components/money/balance'
 import { resolveMembers, displayName } from '@/components/money/members'
 import { nextOccurrence } from '@/lib/rrule'
@@ -17,13 +16,32 @@ import type {
   BudgetRow,
 } from '@/components/money/map'
 
-const TABS = [
-  { href: '/money/budget', label: 'Monthly budget', blurb: 'Set limits and watch spend per category.' },
-  { href: '/money/bills', label: 'Bills & subscriptions', blurb: 'Track what is due and when.' },
-  { href: '/money/expenses', label: 'Split expenses', blurb: 'Log spend, split it, snap a receipt.' },
-  { href: '/money/savings', label: 'Savings goals', blurb: 'Set targets and track progress.' },
-  { href: '/money/who-owes-who', label: 'Who owes who', blurb: 'Your live running balance.' },
+/** Drill-in rows linking to the existing /money/* sub-routes. */
+const DRILL_INS = [
+  { href: '/money/expenses', label: 'Split expenses' },
+  { href: '/money/bills', label: 'Bills & subscriptions' },
+  { href: '/money/savings', label: 'Savings goals' },
+  { href: '/money/who-owes-who', label: 'Who owes who' },
+  { href: '/money/budget', label: 'Monthly budget' },
 ]
+
+function Chevron() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#C8B79C"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  )
+}
 
 export default async function MoneyPage() {
   const { user, householdId } = await requireHousehold()
@@ -83,15 +101,30 @@ export default async function MoneyPage() {
     (budgetRows ?? []).map((b) => ({ category: b.category, limitAmount: b.limit_amount })),
     monthSpend,
   )
-  const warning = anyBudgetWarning(progress)
   const monthTotal = monthSpend.reduce((s, e) => s + e.amount, 0)
 
-  // Who owes who — recomputed live.
+  // Hero progress: this month's total spend vs the sum of all category limits.
+  const budgetTotal = (budgetRows ?? []).reduce((s, b) => s + b.limit_amount, 0)
+  const budgetPct = budgetTotal > 0 ? Math.round((monthTotal / budgetTotal) * 100) : 0
+
+  // Who owes who — recomputed live, oriented from the current user's view.
   const balance = computeWhoOwesWho(
     expenses.map((e) => ({ id: e.id, paidByUserId: e.paid_by_user_id, amount: e.amount })),
     splits.map((s) => ({ expenseId: s.expense_id, userId: s.user_id, shareAmount: s.share_amount })),
     members.map((m) => m.userId),
   )
+  const settled = balance.amount <= 0 || !balance.debtorUserId || !balance.creditorUserId
+  // The "other" member is the partner (the member who isn't the signed-in user).
+  const partner = members.find((m) => m.userId !== user.id)
+  const partnerName = partner ? partner.name : 'Your partner'
+  // Direction relative to "you": creditor === you → partner owes you.
+  const partnerOwesYou = !settled && balance.creditorUserId === user.id
+  const owesLabel = settled
+    ? 'ALL SQUARE'
+    : partnerOwesYou
+      ? `${displayName(balance.debtorUserId!, members, user.id).toUpperCase()} OWES YOU`
+      : `YOU OWE ${displayName(balance.creditorUserId!, members, user.id).toUpperCase()}`
+  const owesAmount = settled ? formatZar(0) : formatZar(balance.amount)
 
   // Upcoming bills + subscriptions in the next 7 days.
   const now = new Date()
@@ -116,129 +149,140 @@ export default async function MoneyPage() {
   ]
     .filter((x) => x.when != null && x.when <= soon)
     .sort((a, b) => (a.when!.getTime() - b.when!.getTime()))
-    .slice(0, 3)
+  const dueTotal = upcoming.reduce((s, u) => s + u.amount, 0)
+  const dueCount = upcoming.length
 
-  const balanceLine =
-    balance.amount <= 0 || !balance.debtorUserId || !balance.creditorUserId
-      ? 'All settled up'
-      : `${displayName(balance.debtorUserId, members, user.id)} owes ${displayName(
-          balance.creditorUserId,
-          members,
-          user.id,
-        )} ${formatZar(balance.amount)}`
+  // Budgets running hot: most-at-risk first, only categories with a real limit.
+  const hotRows = progress.filter((p) => p.limit > 0).slice(0, 4)
 
   return (
-    <main className="min-h-screen p-8">
-      <div className="mx-auto max-w-3xl space-y-6">
-        <header>
-          <h1 className="font-serif text-3xl text-terracotta-700">Money</h1>
-          <p className="text-sage-600">{formatMonth(month)} at a glance</p>
-        </header>
+    <main className="animate-[fadeIn_250ms_ease] px-[22px] pb-[120px] pt-2">
+      <ScreenHeader title="Money" />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <StatCard
-            label="Spent this month"
-            value={formatZarRounded(monthTotal)}
-            hint={warning ? 'A budget is running hot — check below' : 'Across all categories'}
-            emphasis
-          />
-          <Link href="/money/who-owes-who" className="block">
-            <StatCard label="Who owes who" value={balanceLine} hint="Tap to see the breakdown" />
+      <div className="space-y-4">
+        {/* Spent-this-month hero. */}
+        <section className="rounded-[22px] bg-sage-700 p-[18px] text-cream-50">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-sage-200">
+            Spent this month
+          </p>
+          <p className="mt-1.5 font-serif text-[38px] font-semibold leading-none">
+            {formatZarRounded(monthTotal)}
+          </p>
+          <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/[0.18]">
+            <div
+              className="h-full rounded-full bg-terracotta-300"
+              style={{ width: `${Math.min(100, budgetPct)}%` }}
+            />
+          </div>
+          <p className="mt-2 text-[13px] font-medium text-sage-200">
+            {budgetTotal > 0
+              ? `${budgetPct}% of ${formatZarRounded(budgetTotal)}`
+              : 'No budget set this month'}
+          </p>
+        </section>
+
+        {/* Two stat tiles. */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Partner owes you — terracotta tile with optimistic Settle up. */}
+          <div className="rounded-[18px] border border-terracotta-100 bg-terracotta-50 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-terracotta-600">
+              {owesLabel}
+            </p>
+            <div className="mt-2.5">
+              {settled ? (
+                <p className="font-serif text-[28px] font-semibold leading-none text-terracotta-700">
+                  {formatZar(0)}
+                </p>
+              ) : (
+                <SettleUpButton amountLabel={owesAmount} partnerName={partnerName} />
+              )}
+            </div>
+          </div>
+
+          {/* Due this week — white tile. */}
+          <Link
+            href="/money/bills"
+            className="block rounded-[18px] border border-cream-300 bg-cream-50 p-4"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-sage-600">
+              Due this week
+            </p>
+            <p className="mt-2.5 font-serif text-[28px] font-semibold leading-none text-terracotta-900">
+              {formatZarRounded(dueTotal)}
+            </p>
+            <p className="mt-2 text-[13px] text-sage-600">
+              {dueCount === 0 ? 'Nothing due' : `${dueCount} ${dueCount === 1 ? 'bill' : 'bills'}`}
+            </p>
           </Link>
         </div>
 
-        {/* Budget warning card (spec §7 dashboard + §9.1). */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-serif text-terracotta-700">Budget warnings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sage-800">
-            {progress.length === 0 ? (
-              <p className="text-sage-600">
-                No budgets set yet.{' '}
-                <Link href="/money/budget" className="text-terracotta-700 underline">
-                  Set this month&apos;s budget
-                </Link>
-                .
-              </p>
-            ) : (
-              progress
-                .filter((p) => p.limit > 0)
-                .slice(0, 4)
-                .map((p) => (
-                  <div key={p.category} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className={p.warning ? 'font-medium text-terracotta-700' : ''}>
-                        {p.category}
-                      </span>
-                      <span className={p.warning ? 'text-terracotta-700' : 'text-sage-600'}>
+        {/* Budgets running hot. */}
+        <section className="rounded-[18px] border border-cream-300 bg-cream-50 p-[18px]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-sage-600">
+            Budgets running hot
+          </p>
+          {hotRows.length === 0 ? (
+            <p className="mt-3 text-sm text-sage-600">
+              No budgets set yet.{' '}
+              <Link href="/money/budget" className="font-medium text-terracotta-700 underline">
+                Set this month&apos;s budget
+              </Link>
+              .
+            </p>
+          ) : (
+            <ul className="mt-3.5 space-y-3.5">
+              {hotRows.map((p) => {
+                const hot = p.ratio >= 0.75
+                return (
+                  <li key={p.category} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-terracotta-900">{p.category}</span>
+                      <span className="text-sage-600">
                         {formatZar(p.spent)} / {formatZar(p.limit)}
                       </span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-sage-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-[#EDE4D4]">
                       <div
-                        className={p.over ? 'h-full bg-terracotta-600' : p.warning ? 'h-full bg-terracotta-400' : 'h-full bg-sage-400'}
+                        className={hot ? 'h-full bg-terracotta-400' : 'h-full bg-sage-400'}
                         style={{ width: `${Math.min(100, Math.round(p.ratio * 100))}%` }}
                       />
                     </div>
-                  </div>
-                ))
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Upcoming bills. */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-serif text-terracotta-700">Due in the next 7 days</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sage-800">
-            {upcoming.length === 0 ? (
-              <p className="text-sage-600">Nothing due this week.</p>
-            ) : (
-              <ul className="space-y-1 text-sm">
-                {upcoming.map((u, i) => (
-                  <li key={i} className="flex justify-between">
-                    <span>{u.name}</span>
-                    <span className="text-sage-600">{formatZar(u.amount)}</span>
                   </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+                )
+              })}
+            </ul>
+          )}
+        </section>
 
-        {/* Tab navigation cards. */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          {TABS.map((t) => (
-            <Link key={t.href} href={t.href} className="block">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-serif text-lg text-terracotta-700">{t.label}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-sage-600">{t.blurb}</p>
-                </CardContent>
-              </Card>
+        {/* Drill-in list. */}
+        <nav className="space-y-2.5">
+          {DRILL_INS.map((d) => (
+            <Link
+              key={d.href}
+              href={d.href}
+              className="flex items-center justify-between rounded-[16px] border border-cream-300 bg-cream-50 px-4 py-3.5"
+            >
+              <span className="text-sm font-medium text-terracotta-900">{d.label}</span>
+              <Chevron />
             </Link>
           ))}
-        </div>
+        </nav>
 
-        {/* Bond tracker — kept as a clear card/link (mortgage module). */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-serif text-terracotta-700">Bond tracker</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 text-sage-700">
-            <p className="text-sm">
-              Track your access bond — what you&apos;ve paid down, how far ahead of schedule you
-              are, and how much you can redraw.
+        {/* Bond card — link to the mortgage module. */}
+        <Link
+          href="/mortgage"
+          className="flex items-center justify-between rounded-[18px] border border-terracotta-100 bg-terracotta-50 px-4 py-4"
+        >
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-terracotta-600">
+              Bond tracker
             </p>
-            <Link href="/mortgage">
-              <Button className="self-start">Open bond tracker</Button>
-            </Link>
-          </CardContent>
-        </Card>
+            <p className="mt-1 text-sm text-terracotta-900">
+              Paid down, ahead of schedule &amp; redraw available
+            </p>
+          </div>
+          <Chevron />
+        </Link>
       </div>
     </main>
   )
