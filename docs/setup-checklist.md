@@ -84,7 +84,8 @@ Get the local Supabase keys any time with: `npx supabase status` (Docker must be
 Use your **personal** Vercel account — **not** the NUtec/`nutecdigital.com` work account (this is a personal project; locked decision #19).
 
 1. Import the GitHub repo into Vercel.
-2. **Settings → Environment Variables** — add for **all environments** (Production, Preview, Development). Start with the four below; add the rest as their features get built (items 6–9):
+2. **Settings → Node.js Version → 22.x** (REQUIRED — the app depends on native `WebSocket`, which Node 20 lacks; on Node 20 every Supabase client throws at startup).
+3. **Settings → Environment Variables** — add for **all environments** (Production, Preview, Development). Start with the four below; add the rest as their features get built (items 6–9). For push, also add `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, and `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (generate with `npx web-push generate-vapid-keys`):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://gcltdipgyioxumloqaiz.supabase.co
