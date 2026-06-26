@@ -80,4 +80,33 @@ describe('create_household RPC', () => {
     expect(secondError).not.toBeNull()
     expect(secondError!.message).toMatch(/already.*household|already a member/i)
   })
+
+  it('the DB rejects a user belonging to two households (unique index backstop)', async () => {
+    // Serialization backstop against a concurrent double-submit that slips past
+    // the application-level count() check in create_household / accept_invite.
+    const user = await createTestUser()
+    const client = await authedClient(user.email, user.password)
+    const { data: householdId } = await client.rpc('create_household', { p_name: 'First' })
+
+    const service = serviceClient()
+    const { data: otherHousehold } = await service
+      .from('households')
+      .insert({ name: 'Second', owner_user_id: user.id })
+      .select('id')
+      .single()
+
+    const { error } = await service
+      .from('household_members')
+      .insert({ household_id: otherHousehold!.id, user_id: user.id, role: 'partner' })
+
+    expect(error).not.toBeNull()
+    expect(error!.code).toBe('23505') // unique_violation
+    // The original membership is untouched.
+    const { data: members } = await service
+      .from('household_members')
+      .select('household_id')
+      .eq('user_id', user.id)
+    expect(members).toHaveLength(1)
+    expect(members![0]!.household_id).toBe(householdId)
+  })
 })

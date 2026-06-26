@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { safeRelativePath } from '@/lib/auth/redirects'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -20,6 +21,5 @@ export async function GET(request: NextRequest) {
   }
 
   // Validate `next` is a relative path; reject open-redirects.
-  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/'
-  return NextResponse.redirect(`${origin}${safeNext}`)
+  return NextResponse.redirect(`${origin}${safeRelativePath(next)}`)
 }

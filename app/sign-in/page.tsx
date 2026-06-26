@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SignInButton } from './sign-in-button'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { safeRelativePath } from '@/lib/auth/redirects'
 import { redirect } from 'next/navigation'
 
 export default async function SignInPage({
@@ -10,7 +11,7 @@ export default async function SignInPage({
 }) {
   const { next, error } = await searchParams
   const user = await getCurrentUser()
-  if (user) redirect(next && next.startsWith('/') ? next : '/')
+  if (user) redirect(safeRelativePath(next))
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
