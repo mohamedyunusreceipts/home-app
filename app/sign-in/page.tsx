@@ -3,10 +3,14 @@ import { SignInButton } from './sign-in-button'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { redirect } from 'next/navigation'
 
-export default async function SignInPage() {
-  // If already signed in, bounce to home (which routes to setup or dashboard).
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; error?: string }>
+}) {
+  const { next, error } = await searchParams
   const user = await getCurrentUser()
-  if (user) redirect('/')
+  if (user) redirect(next && next.startsWith('/') ? next : '/')
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
@@ -21,7 +25,12 @@ export default async function SignInPage() {
             Shared home management for couples. Sign in with the Google account you want
             tied to your household.
           </p>
-          <SignInButton />
+          {error && (
+            <p className="text-sm text-terracotta-700" role="alert">
+              {decodeURIComponent(error)}
+            </p>
+          )}
+          <SignInButton nextPath={next} />
         </CardContent>
       </Card>
     </main>
