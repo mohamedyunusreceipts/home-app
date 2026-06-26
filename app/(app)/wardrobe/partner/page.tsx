@@ -1,21 +1,22 @@
-import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { requireHousehold } from '@/lib/auth/redirects'
 import { createClient } from '@/lib/supabase/server'
 import { WardrobeTabs } from '@/components/wardrobe/tabs'
 import { ItemCard } from '@/components/wardrobe/item-card'
 import { ITEM_COLUMNS, type WardrobeItemRow } from '@/components/wardrobe/types'
 
-export default async function MyWardrobePage() {
+export default async function PartnerWardrobePage() {
   const { user, householdId } = await requireHousehold()
   const supabase = await createClient()
 
+  // Items in the household NOT owned by me. RLS already filters out any of the
+  // partner's items flagged visible_to_partner=false, so this only returns what
+  // the partner has chosen to share (spec §9.6 per-user privacy).
   const { data: items } = await supabase
     .from('wardrobe_items')
     .select(ITEM_COLUMNS)
     .eq('household_id', householdId)
-    .eq('owner_user_id', user.id)
+    .neq('owner_user_id', user.id)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .returns<WardrobeItemRow[]>()
@@ -25,32 +26,23 @@ export default async function MyWardrobePage() {
   return (
     <main className="min-h-screen p-8">
       <div className="mx-auto max-w-4xl space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-serif text-3xl text-terracotta-700">My wardrobe</h1>
-          <Link href="/wardrobe/items/new">
-            <Button>Add an item</Button>
-          </Link>
-        </header>
-
-        <WardrobeTabs active="/wardrobe" />
+        <h1 className="font-serif text-3xl text-terracotta-700">Partner wardrobe</h1>
+        <WardrobeTabs active="/wardrobe/partner" />
 
         {rows.length === 0 ? (
           <Card>
-            <CardContent className="space-y-4 p-6 text-sage-800">
+            <CardContent className="p-6 text-sage-800">
               <p>
-                Your wardrobe is empty. Snap a photo of a garment and tag its
-                category, season and occasion — then the outfit generator can
-                start putting looks together for you.
+                Nothing to show yet. Items your partner adds appear here once they
+                choose to share them. Private items (and underwear by default) stay
+                hidden.
               </p>
-              <Link href="/wardrobe/items/new">
-                <Button>Add your first item</Button>
-              </Link>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((item) => (
-              <ItemCard key={item.id} item={item} editable />
+              <ItemCard key={item.id} item={item} editable={false} />
             ))}
           </div>
         )}
