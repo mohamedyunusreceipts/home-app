@@ -63,6 +63,17 @@ export default async function MortgagePage() {
     .order('statement_month', { ascending: true })
     .returns<StatementRow[]>()
 
+  const { data: txRows } = await supabase
+    .from('mortgage_transactions')
+    .select('amount, kind')
+    .eq('mortgage_id', mortgage.id)
+    .returns<{ amount: number; kind: 'extra_deposit' | 'withdrawal' }[]>()
+
+  const netExtraIn = (txRows ?? []).reduce(
+    (sum, t) => sum + (t.kind === 'extra_deposit' ? t.amount : -t.amount),
+    0,
+  )
+
   const rows = statementRows ?? []
   const config = toBondConfig(mortgage)
   const statements = rows.map(toMonthlyStatement)
@@ -172,6 +183,14 @@ export default async function MortgagePage() {
           }
         />
 
+        <Link href="/mortgage/transactions" className="block">
+          <StatCard
+            label="Contributions"
+            value={formatZar(netExtraIn)}
+            hint="Net extra paid in — tap to log deposits & withdrawals"
+          />
+        </Link>
+
         <Card>
           <CardHeader>
             <CardTitle className="font-serif text-terracotta-700">
@@ -186,6 +205,9 @@ export default async function MortgagePage() {
         <div className="flex flex-wrap gap-3">
           <Link href="/mortgage/statements">
             <Button variant="outline">Statements</Button>
+          </Link>
+          <Link href="/mortgage/transactions">
+            <Button variant="outline">Contributions</Button>
           </Link>
           <Link href="/mortgage/calculators">
             <Button variant="outline">Calculators</Button>

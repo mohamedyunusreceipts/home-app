@@ -31,6 +31,21 @@ export type StatementRow = {
   note: string | null
 }
 
+/** Kind of an access-facility transaction. */
+export type TransactionKind = 'extra_deposit' | 'withdrawal'
+
+/** Shape of a `mortgage_transactions` row as returned from supabase. */
+export type TransactionRow = {
+  id: string
+  household_id: string
+  mortgage_id: string
+  occurred_on: string
+  amount: number
+  kind: TransactionKind
+  contributed_by_user_id: string | null
+  note: string | null
+}
+
 /** Map a `mortgages` DB row into the engine's BondConfig. */
 export function toBondConfig(row: MortgageRow): BondConfig {
   return {
