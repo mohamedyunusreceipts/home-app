@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { requireHousehold } from '@/lib/auth/redirects'
 import { createClient } from '@/lib/supabase/server'
 import { InviteCard } from './invite-card'
+import { PushToggle } from '@/components/shell/push-toggle'
 import { signOutAction } from './actions'
 
 export default async function SettingsPage() {
@@ -75,6 +76,19 @@ export default async function SettingsPage() {
             </CardContent>
           </Card>
         )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-serif text-terracotta-700">Notifications</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sage-800">
+            <p>
+              Get push notifications on this device for reminders and partner
+              activity, even when the app is not open.
+            </p>
+            <PushToggle />
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
