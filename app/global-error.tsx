@@ -57,30 +57,9 @@ export default function GlobalError({
             usually puts everything back the way it was.
           </p>
           {error.digest ? (
-            <p style={{ fontSize: '0.75rem', color: '#4B684C', margin: '0 0 1rem' }}>
+            <p style={{ fontSize: '0.75rem', color: '#4B684C', margin: '0 0 1.5rem' }}>
               Reference: <span style={{ fontFamily: 'monospace' }}>{error.digest}</span>
             </p>
-          ) : null}
-          {error?.message ? (
-            <pre
-              style={{
-                textAlign: 'left',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                fontSize: '0.75rem',
-                fontFamily: 'monospace',
-                background: '#F0E9DD',
-                color: '#793F2D',
-                padding: '0.75rem',
-                borderRadius: '0.5rem',
-                margin: '0 0 1.5rem',
-                maxHeight: '14rem',
-                overflow: 'auto',
-              }}
-            >
-              {error.name}: {error.message}
-              {error.stack ? `\n\n${error.stack}` : ''}
-            </pre>
           ) : null}
           {retry ? (
             <button
