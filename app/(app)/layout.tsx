@@ -1,34 +1,29 @@
 import { requireHousehold } from '@/lib/auth/redirects'
-import { createClient } from '@/lib/supabase/server'
-import { TopBar } from '@/components/shell/top-bar'
-import { PrimaryNav } from '@/components/shell/primary-nav'
-import { Fab } from '@/components/shell/fab'
+import { ShellProvider } from '@/components/shell/shell-context'
 
 /**
- * Authenticated app shell — top bar, primary nav (bottom tabs on mobile / left
- * sidebar on desktop), context FAB. Auth-gates the whole group via
- * requireHousehold(). Spec §6.
+ * Authenticated app shell — Focus Timeline redesign.
+ *
+ * Auth-gates the whole group via requireHousehold(), then wraps the page tree
+ * in ShellProvider. The provider renders the shell chrome (desktop sidebar +
+ * mobile floating pill nav, quick-add / More bottom sheets, and the toast) and
+ * exposes useShell() (showToast / openQuickAdd / openMore / closeSheet) to any
+ * client component beneath it.
+ *
+ * The fixed mobile top bar is gone — per-screen headers (Today's avatars + ⋮,
+ * other screens' back-chevron + title) are built per page. Pages render their
+ * own <main> with bottom padding (~120px) so content clears the pill nav.
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const { householdId } = await requireHousehold()
-  const supabase = await createClient()
-  const { data: household } = await supabase
-    .from('households')
-    .select('name')
-    .eq('id', householdId)
-    .single()
+  await requireHousehold()
 
   return (
     <div className="min-h-screen bg-background">
-      <TopBar householdName={household?.name ?? 'Home'} />
-      <PrimaryNav />
-
-      {/* Content area — offset for the fixed top bar (all sizes) and the fixed
-          sidebar (desktop). Bottom padding clears the mobile tab bar. Pages
-          render their own <main>, so this is a plain wrapper. */}
-      <div className="pt-14 pb-24 md:pb-8 md:pl-56">{children}</div>
-
-      <Fab />
+      <ShellProvider>
+        {/* Desktop offset for the fixed sidebar; mobile bottom space clears the
+            floating pill nav. Pages render their own <main>. */}
+        <div className="pb-28 md:pb-8 md:pl-56">{children}</div>
+      </ShellProvider>
     </div>
   )
 }

@@ -38,6 +38,20 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
+/* Shell chrome animations (Focus Timeline redesign — additive). */
+@keyframes sheetIn {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
 @layer base {
   h1, h2, h3, h4 {
     font-family: var(--font-fraunces), Georgia, serif;
