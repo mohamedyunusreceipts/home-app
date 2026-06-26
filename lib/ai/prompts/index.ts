@@ -166,6 +166,55 @@ export const giftIdeas: PromptBuilder = (context) => {
 }
 
 /**
+ * Wardrobe kind: suggest an outfit for an occasion (spec §9.6).
+ * context: { occasion?: string; season?: string; weather?: string;
+ *            items?: string[]; notes?: string }
+ * `items` is a pre-formatted list of the owner's available garments
+ * (e.g. "Navy linen shirt (top, summer)"), built client-side from the wardrobe.
+ */
+export const wardrobeOutfit: PromptBuilder = (context) => {
+  const c = asRecord(context)
+  const occasion = typeof c.occasion === 'string' && c.occasion.trim() ? c.occasion : 'everyday wear'
+  const season = typeof c.season === 'string' ? c.season : ''
+  const weather = typeof c.weather === 'string' ? c.weather : ''
+  const items = asStringArray(c.items)
+  const notes = typeof c.notes === 'string' ? c.notes : ''
+
+  const wardrobeLine =
+    items.length > 0
+      ? `Available items in the wardrobe:\n${items.map((i) => `- ${i}`).join('\n')}`
+      : 'No specific items were listed; suggest a sensible outfit composition by category.'
+  const contextLine = [
+    season ? `Season: ${season}.` : '',
+    weather ? `Weather: ${weather}.` : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return {
+    system:
+      'You are a personal stylist helping someone put together an outfit from ' +
+      'the clothes they already own. Pick ONE coherent outfit — name the pieces ' +
+      '(top, bottom or dress, shoes, and an optional layer or accessory) using ' +
+      'only items from the provided list where one is given. Keep it to a short ' +
+      'list plus one line on why it works. No preamble.',
+    messages: [
+      {
+        role: 'user',
+        content: [
+          `Suggest an outfit for ${occasion}.`,
+          contextLine,
+          wardrobeLine,
+          notes,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      },
+    ],
+  }
+}
+
+/**
  * Vision kind STUB: receipt OCR (spec §8.1 — "Haiku with vision for receipt OCR").
  *
  * Wires the multimodal message shape (a base64 image block + an instruction)
@@ -211,6 +260,7 @@ export const PROMPT_BUILDERS = {
   leftover_ideas: leftoverIdeas,
   budget_meals: budgetMeals,
   gift_ideas: giftIdeas,
+  wardrobe_outfit: wardrobeOutfit,
   receipt_ocr: receiptOcr,
 } satisfies Record<string, PromptBuilder>
 
