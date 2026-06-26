@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { formatWeekday, formatDayMonth } from '@/components/food/format'
@@ -20,6 +21,8 @@ export type Assignment = {
 
 export type RecipeOption = { id: string; name: string }
 
+export type CatalogueOption = { id: string; kind: 'food' | 'dessert'; name: string }
+
 /** Map of `${date}|${slot}` → assignment. */
 export type PlanMap = Record<string, Assignment | undefined>
 
@@ -31,14 +34,19 @@ function SlotCell({
   slot,
   current,
   recipes,
+  catalogue,
   onSaved,
 }: {
   date: string
   slot: MealSlot
   current: Assignment | undefined
   recipes: RecipeOption[]
+  catalogue: CatalogueOption[]
   onSaved: () => void
 }) {
+  const listId = `catalogue-${date}-${slot}`
+  const meals = catalogue.filter((c) => c.kind === 'food')
+  const desserts = catalogue.filter((c) => c.kind === 'dessert')
   const [pending, setPending] = useState(false)
   const [recipeId, setRecipeId] = useState(current?.recipeId ?? '')
   const [freeText, setFreeText] = useState(current?.freeText ?? '')
@@ -75,16 +83,29 @@ function SlotCell({
         ))}
       </select>
       {!recipeId && (
-        <input
-          type="text"
-          aria-label={`${SLOT_LABEL[slot]} free text`}
-          placeholder="or type a meal"
-          className={selectClass}
-          value={freeText}
-          disabled={pending}
-          maxLength={120}
-          onChange={(e) => setFreeText(e.target.value)}
-        />
+        <>
+          <input
+            type="text"
+            aria-label={`${SLOT_LABEL[slot]} free text`}
+            placeholder={catalogue.length ? 'or type / pick a meal' : 'or type a meal'}
+            className={selectClass}
+            value={freeText}
+            disabled={pending}
+            maxLength={120}
+            list={catalogue.length ? listId : undefined}
+            onChange={(e) => setFreeText(e.target.value)}
+          />
+          {catalogue.length > 0 && (
+            <datalist id={listId}>
+              {meals.map((c) => (
+                <option key={c.id} value={c.name} />
+              ))}
+              {desserts.map((c) => (
+                <option key={c.id} value={c.name} label={`${c.name} (dessert)`} />
+              ))}
+            </datalist>
+          )}
+        </>
       )}
       <Button
         type="button"
@@ -104,11 +125,13 @@ export function MealPlanGrid({
   weekStart,
   dates,
   recipes,
+  catalogue,
   plan,
 }: {
   weekStart: string
   dates: string[]
   recipes: RecipeOption[]
+  catalogue: CatalogueOption[]
   plan: PlanMap
 }) {
   const router = useRouter()
@@ -145,6 +168,16 @@ export function MealPlanGrid({
         )}
       </div>
 
+      {catalogue.length === 0 && (
+        <p className="text-sm text-sage-600">
+          Tip: build your{' '}
+          <Link href="/food/catalogue" className="text-terracotta-600 hover:underline">
+            meals &amp; desserts catalogue
+          </Link>{' '}
+          to pick favourite dishes straight into any slot.
+        </p>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] border-collapse">
           <thead>
@@ -171,6 +204,7 @@ export function MealPlanGrid({
                       slot={slot}
                       current={plan[`${d}|${slot}`]}
                       recipes={recipes}
+                      catalogue={catalogue}
                       onSaved={() => router.refresh()}
                     />
                   </td>
