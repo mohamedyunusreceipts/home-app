@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Fraunces, Inter } from 'next/font/google'
 import './globals.css'
 import { SwRegister } from '@/components/shell/sw-register'
+import { InstallPrompt } from '@/components/shell/install-prompt'
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans antialiased">
         <SwRegister />
         {children}
+        <InstallPrompt />
       </body>
     </html>
   )
