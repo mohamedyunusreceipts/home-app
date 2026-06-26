@@ -8,9 +8,12 @@ import type { MetadataRoute } from 'next'
  *   theme_color      → terracotta-400 #C77B5C
  *   background_color → cream-100       #FAF6EF
  *
- * TODO(pwa-polish): ship real maskable PNG icons at /icon-192.png and
- * /icon-512.png. Until those binaries exist we reference the existing
- * favicon.ico so installs and the build don't break.
+ * Icons are generated at build time by app/icon.tsx (512×512) and
+ * app/apple-icon.tsx (180×180) via next/og's ImageResponse — real PNGs with
+ * no committed binaries. We reference the 512 icon here for both the standard
+ * "any" purpose and a "maskable" entry (the icon fills its tile edge-to-edge,
+ * keeping the glyph inside the maskable safe zone). The favicon.ico stays as a
+ * universal fallback.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -26,6 +29,18 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/favicon.ico',
         sizes: 'any',
         type: 'image/x-icon',
+      },
+      {
+        src: '/icon',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
       },
     ],
   }
