@@ -67,6 +67,73 @@ export const recipeIdeas: PromptBuilder = (context) => {
 }
 
 /**
+ * Food kind: leftover ideas — repurpose what's about to expire (spec §9.2).
+ * context: { leftovers?: string[]; pantry?: string[]; notes?: string }
+ */
+export const leftoverIdeas: PromptBuilder = (context) => {
+  const c = asRecord(context)
+  const leftovers = asStringArray(c.leftovers)
+  const pantry = asStringArray(c.pantry)
+  const notes = typeof c.notes === 'string' ? c.notes : ''
+
+  const leftoverLine =
+    leftovers.length > 0
+      ? `Leftovers / things to use up soon: ${leftovers.join(', ')}.`
+      : 'We did not list specific leftovers; suggest flexible ways to use up odds and ends.'
+  const pantryLine =
+    pantry.length > 0 ? `Also on hand in the pantry: ${pantry.join(', ')}.` : ''
+
+  return {
+    system:
+      'You help a busy couple turn leftovers and soon-to-expire food into easy ' +
+      'meals so nothing goes to waste. Reply with 3 concise ideas as a short ' +
+      'list. For each give a name and a one-line method. No preamble.',
+    messages: [
+      {
+        role: 'user',
+        content: [leftoverLine, pantryLine, notes].filter(Boolean).join('\n'),
+      },
+    ],
+  }
+}
+
+/**
+ * Food kind: budget meals for the week (spec §9.2).
+ * context: { budget?: string | number; servings?: number; pantry?: string[]; notes?: string }
+ */
+export const budgetMeals: PromptBuilder = (context) => {
+  const c = asRecord(context)
+  const budget =
+    typeof c.budget === 'string' || typeof c.budget === 'number'
+      ? String(c.budget)
+      : 'a tight budget'
+  const servings = typeof c.servings === 'number' ? c.servings : undefined
+  const pantry = asStringArray(c.pantry)
+  const notes = typeof c.notes === 'string' ? c.notes : ''
+
+  const servingsLine = servings ? ` for ${servings} servings each` : ''
+  const pantryLine =
+    pantry.length > 0 ? ` Use what we already have where possible: ${pantry.join(', ')}.` : ''
+
+  return {
+    system:
+      'You plan affordable weeknight dinners for a couple in South Africa, ' +
+      'mindful of cost. Reply with up to 5 budget-friendly meal ideas as a ' +
+      'short list, each with a name and a one-line note on why it is cheap. ' +
+      'No preamble.',
+    messages: [
+      {
+        role: 'user',
+        content:
+          `Suggest budget meals for the week on ${budget}${servingsLine}.` +
+          pantryLine +
+          (notes ? `\n${notes}` : ''),
+      },
+    ],
+  }
+}
+
+/**
  * Example kind: gift ideas for a person/occasion within a budget.
  * context: { recipient?: string; occasion?: string; budget?: string | number; interests?: string[] }
  */
@@ -141,6 +208,8 @@ export const receiptOcr: PromptBuilder = (context) => {
  */
 export const PROMPT_BUILDERS = {
   recipe_ideas: recipeIdeas,
+  leftover_ideas: leftoverIdeas,
+  budget_meals: budgetMeals,
   gift_ideas: giftIdeas,
   receipt_ocr: receiptOcr,
 } satisfies Record<string, PromptBuilder>
