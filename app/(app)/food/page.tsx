@@ -6,9 +6,12 @@ import { FoodTabs } from '@/components/food/tabs'
 import { startOfWeek, weekDates, type MealPlanRow, type RecipeRow } from '@/components/food/types'
 import {
   MealPlanGrid,
+  type CatalogueOption,
   type PlanMap,
   type RecipeOption,
 } from './meal-plan-grid'
+
+type CatalogueRow = { id: string; kind: 'food' | 'dessert'; name: string }
 
 export default async function FoodMealPlanPage() {
   const { householdId } = await requireHousehold()
@@ -33,7 +36,20 @@ export default async function FoodMealPlanPage() {
     .is('deleted_at', null)
     .returns<MealPlanRow[]>()
 
+  const { data: catalogueRows } = await supabase
+    .from('catalogue_items')
+    .select('id, kind, name')
+    .eq('household_id', householdId)
+    .order('name', { ascending: true })
+    .returns<CatalogueRow[]>()
+
   const recipes: RecipeOption[] = (recipeRows ?? []).map((r) => ({ id: r.id, name: r.name }))
+
+  const catalogue: CatalogueOption[] = (catalogueRows ?? []).map((c) => ({
+    id: c.id,
+    kind: c.kind,
+    name: c.name,
+  }))
 
   const plan: PlanMap = {}
   for (const row of planRows ?? []) {
@@ -64,7 +80,13 @@ export default async function FoodMealPlanPage() {
                 straight into any slot below.
               </p>
             ) : null}
-            <MealPlanGrid weekStart={weekStart} dates={dates} recipes={recipes} plan={plan} />
+            <MealPlanGrid
+              weekStart={weekStart}
+              dates={dates}
+              recipes={recipes}
+              catalogue={catalogue}
+              plan={plan}
+            />
           </CardContent>
         </Card>
 
