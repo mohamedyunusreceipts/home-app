@@ -3,7 +3,7 @@ import { requireHousehold } from '@/lib/auth/redirects'
 import { createClient } from '@/lib/supabase/server'
 import { ScreenHeader } from '@/components/shell/screen-header'
 import { WardrobeTabs } from '@/components/wardrobe/tabs'
-import { ItemCard } from '@/components/wardrobe/item-card'
+import { ItemTile } from '@/components/wardrobe/item-tile'
 import { TodaysOutfit } from '@/components/wardrobe/todays-outfit'
 import { toDisplayItem } from '@/components/wardrobe/item-label'
 import { ITEM_COLUMNS, type WardrobeItemRow } from '@/components/wardrobe/types'
@@ -103,7 +103,7 @@ export default async function MyWardrobePage() {
       ) : (
         <div className="mt-3 grid grid-cols-3 gap-3">
           {rows.map((item) => (
-            <ItemCard key={item.id} item={item} editable />
+            <ItemTile key={item.id} item={item} />
           ))}
         </div>
       )}

@@ -50,14 +50,21 @@ function MoreButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="More"
+      // 44px tap target (negative margin keeps the visible 38px chip aligned so
+      // surrounding layout is unchanged).
       className="inline-flex items-center justify-center"
-      style={{ width: 38, height: 38, background: '#F2EBDF', borderRadius: 12 }}
+      style={{ width: 44, height: 44, margin: -3 }}
     >
-      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-        {[3, 9, 15].map((y) =>
-          [3, 9, 15].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.6" fill="#8a7163" />),
-        )}
-      </svg>
+      <span
+        className="inline-flex items-center justify-center"
+        style={{ width: 38, height: 38, background: '#F2EBDF', borderRadius: 12 }}
+      >
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+          {[3, 9, 15].map((y) =>
+            [3, 9, 15].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.6" fill="#8a7163" />),
+          )}
+        </svg>
+      </span>
     </button>
   )
 }
@@ -142,16 +149,20 @@ export function TodayTimeline({ householdName, dateLabel, avatars, items, needYo
     <main className="px-[22px] pt-4 pb-[120px]">
       <div className="mx-auto max-w-xl">
         {/* Header row: overlapping avatars + name | ⋮ More */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="flex">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="flex shrink-0">
               {avatars.map((a, i) => (
                 <Avatar key={`${a.initial}-${i}`} avatar={a} overlap={i > 0} />
               ))}
             </span>
-            <span style={{ fontWeight: 600, fontSize: 14, color: '#3F2118' }}>{householdName}</span>
+            <span className="truncate" style={{ fontWeight: 600, fontSize: 14, color: '#3F2118' }}>
+              {householdName}
+            </span>
           </div>
-          <MoreButton onClick={openMore} />
+          <span className="shrink-0">
+            <MoreButton onClick={openMore} />
+          </span>
         </div>
 
         {/* Title block */}
@@ -248,13 +259,19 @@ function RowCard({
         }}
       >
         <div className="flex items-start justify-between gap-3">
-          <div style={{ fontWeight: 600, fontSize: 14, color: '#3F2118' }}>{item.title}</div>
-          <div className="font-serif" style={{ fontWeight: 600, fontSize: 16, color: '#793F2D' }}>
+          <div className="min-w-0 break-words" style={{ fontWeight: 600, fontSize: 14, color: '#3F2118' }}>
+            {item.title}
+          </div>
+          <div
+            className="shrink-0 font-serif"
+            style={{ fontWeight: 600, fontSize: 16, color: '#793F2D' }}
+          >
             {item.amountLabel}
           </div>
         </div>
-        <div className="mt-1.5 flex items-center justify-between gap-3">
+        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <span
+            className="min-w-0 break-words"
             style={{
               fontWeight: 500,
               fontSize: 11,
@@ -268,11 +285,15 @@ function RowCard({
           <button
             type="button"
             onClick={() => onPay(item)}
+            // ≥44px tap height: min-height plus inline-flex centring; visual
+            // padding stays compact.
+            className="inline-flex shrink-0 items-center justify-center"
             style={{
               background: '#C77B5C',
               color: '#FFFDF9',
               borderRadius: 20,
-              padding: '6px 14px',
+              minHeight: 44,
+              padding: '6px 16px',
               fontSize: 13,
               fontWeight: 600,
             }}
@@ -301,6 +322,7 @@ function RowCard({
           <Checkbox checked={checked} />
           <div className="min-w-0">
             <div
+              className="break-words"
               style={{
                 fontWeight: 600,
                 fontSize: 14,
@@ -331,12 +353,18 @@ function RowCard({
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div style={{ fontWeight: 600, fontSize: 14, color: '#3F2118' }}>{item.title}</div>
+          <div className="break-words" style={{ fontWeight: 600, fontSize: 14, color: '#3F2118' }}>
+            {item.title}
+          </div>
           <div className="mt-0.5">
             <ModuleTag>{item.tag}</ModuleTag>
           </div>
         </div>
-        {item.avatar && <Avatar avatar={item.avatar} size={26} />}
+        {item.avatar && (
+          <span className="shrink-0">
+            <Avatar avatar={item.avatar} size={26} />
+          </span>
+        )}
       </div>
     </div>
   )
@@ -355,7 +383,7 @@ function PaidCard({ item }: { item: Extract<FeedItem, { kind: 'bill' }> }) {
     >
       <div className="flex items-center gap-3">
         <span
-          className="inline-flex items-center justify-center rounded-full"
+          className="inline-flex shrink-0 items-center justify-center rounded-full"
           style={{ width: 24, height: 24, background: '#7A9B7A' }}
           aria-hidden="true"
         >
@@ -365,6 +393,7 @@ function PaidCard({ item }: { item: Extract<FeedItem, { kind: 'bill' }> }) {
         </span>
         <div className="min-w-0">
           <div
+            className="break-words"
             style={{ fontWeight: 600, fontSize: 14, color: '#5F8160', textDecoration: 'line-through' }}
           >
             {item.title}

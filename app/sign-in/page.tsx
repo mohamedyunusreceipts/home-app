@@ -14,7 +14,7 @@ export default async function SignInPage({
   if (user) redirect(safeRelativePath(next))
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
+    <main className="flex min-h-screen items-center justify-center px-5 py-8 sm:p-8">
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle className="font-serif text-terracotta-700 text-2xl">

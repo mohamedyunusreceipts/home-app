@@ -34,7 +34,7 @@ export default async function OccasionOutfitsPage() {
   }
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-28">
       <div className="mx-auto max-w-3xl space-y-6">
         <h1 className="font-serif text-3xl text-terracotta-700">Occasion outfits</h1>
         <WardrobeTabs active="/wardrobe/occasions" />

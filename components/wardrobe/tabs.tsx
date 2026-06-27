@@ -20,7 +20,10 @@ const TABS: { href: string; label: string }[] = [
 
 export function WardrobeTabs({ active }: { active: string }) {
   return (
-    <nav className="flex flex-wrap gap-2" aria-label="Wardrobe sections">
+    <nav
+      className="-mx-[22px] flex gap-2 overflow-x-auto px-[22px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      aria-label="Wardrobe sections"
+    >
       {TABS.map((tab) => {
         const isActive = tab.href === active
         return (
@@ -28,7 +31,7 @@ export function WardrobeTabs({ active }: { active: string }) {
             key={tab.href}
             href={tab.href}
             aria-current={isActive ? 'page' : undefined}
-            className="rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
+            className="shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
             style={
               isActive
                 ? { background: '#7A9B7A', color: '#FFFFFF' }

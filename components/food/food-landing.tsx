@@ -114,7 +114,7 @@ export function FoodLanding({
                         {isDinner ? 'Dinner · Tonight' : SLOT_LABEL[meal.slot]}
                       </div>
                       <div
-                        className="mt-0.5 truncate"
+                        className="mt-0.5 break-words"
                         style={{
                           fontWeight: 600,
                           fontSize: 15,
@@ -201,7 +201,7 @@ export function FoodLanding({
                   key={day.date}
                   type="button"
                   onClick={() => setEditing({ date: day.date, slot: 'dinner' })}
-                  className="block text-left"
+                  className="block w-full text-left"
                   style={{
                     background: '#FFFDF9',
                     border: '1px solid #E8DFCE',
@@ -211,7 +211,7 @@ export function FoodLanding({
                 >
                   <DayHeading date={day.date} />
                   <div
-                    className="mt-1.5 truncate"
+                    className="mt-1.5 break-words"
                     style={{ fontWeight: 600, fontSize: 14, color: '#3F2118' }}
                   >
                     {headline}
@@ -418,6 +418,7 @@ function MealEditor({
           type="button"
           onClick={save}
           disabled={pending}
+          className="min-h-[44px]"
           style={{
             background: '#C77B5C',
             color: '#FFFDF9',
@@ -434,6 +435,7 @@ function MealEditor({
           type="button"
           onClick={onCancel}
           disabled={pending}
+          className="min-h-[44px]"
           style={{
             background: 'transparent',
             border: '1px solid #E8DFCE',

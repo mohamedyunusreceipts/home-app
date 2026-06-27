@@ -32,7 +32,7 @@ export function CreateHouseholdForm() {
           required
           maxLength={80}
           placeholder="e.g. Our Place"
-          className="w-full rounded-md border border-sage-300 bg-cream-50 px-3 py-2 text-sage-900 placeholder:text-sage-400 focus:border-terracotta-400 focus:outline-none focus:ring-2 focus:ring-terracotta-200"
+          className="h-11 w-full rounded-md border border-sage-300 bg-cream-50 px-3 py-2 text-sage-900 placeholder:text-sage-400 focus:border-terracotta-400 focus:outline-none focus:ring-2 focus:ring-terracotta-200"
           disabled={pending}
         />
       </div>
@@ -43,7 +43,7 @@ export function CreateHouseholdForm() {
         </p>
       )}
 
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button type="submit" disabled={pending} className="h-11 w-full">
         {pending ? 'Creating…' : 'Create household'}
       </Button>
     </form>

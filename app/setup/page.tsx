@@ -12,7 +12,7 @@ export default async function SetupPage() {
   if (householdId) redirect('/dashboard')
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
+    <main className="flex min-h-screen items-center justify-center px-5 py-8 sm:p-8">
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle className="font-serif text-terracotta-700 text-2xl">
@@ -27,7 +27,7 @@ export default async function SetupPage() {
 
           <div className="space-y-3">
             <Link href="/setup/create" className="block">
-              <Button className="w-full">Create a new household</Button>
+              <Button className="h-11 w-full">Create a new household</Button>
             </Link>
             <p className="text-sm text-sage-600 text-center">
               Or paste the invite link your partner shared with you into your browser to

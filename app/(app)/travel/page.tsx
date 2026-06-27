@@ -111,7 +111,7 @@ export default async function TravelPage() {
             </p>
             <div className="mt-3 flex items-end justify-between gap-4">
               <div className="min-w-0">
-                <h2 className="font-serif text-[28px] leading-tight font-semibold">
+                <h2 className="font-serif text-[28px] leading-tight font-semibold break-words">
                   {heroTrip.destination || heroTrip.name}
                 </h2>
                 <p className="mt-1 text-[13px] text-sage-100">

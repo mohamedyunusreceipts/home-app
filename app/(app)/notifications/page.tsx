@@ -29,14 +29,14 @@ function NotificationItem({ n }: { n: NotificationRow }) {
       } ${n.link ? 'transition-colors hover:border-terracotta-300' : ''}`}
     >
       <div className="flex items-start justify-between gap-3">
-        <span className="flex items-center gap-2 text-sm font-medium text-sage-800">
+        <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-sage-800">
           {unread && (
             <span
               aria-hidden="true"
               className="inline-block size-2 shrink-0 rounded-full bg-terracotta-500"
             />
           )}
-          {n.title}
+          <span className="min-w-0 break-words">{n.title}</span>
         </span>
         <time
           dateTime={n.created_at}
@@ -45,7 +45,7 @@ function NotificationItem({ n }: { n: NotificationRow }) {
           {formatTime(n.created_at)}
         </time>
       </div>
-      {n.body && <p className="mt-1 text-sm text-sage-600">{n.body}</p>}
+      {n.body && <p className="mt-1 break-words text-sm text-sage-600">{n.body}</p>}
     </div>
   )
 
@@ -66,7 +66,7 @@ export default async function NotificationsPage() {
   const hasUnread = items.some((n) => n.read_at === null)
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6">
+    <main className="mx-auto max-w-2xl px-4 pb-[120px] pt-6">
       <div className="mb-5 flex items-center justify-between">
         <h1 className="font-serif text-2xl text-terracotta-700">Notifications</h1>
         <MarkAllReadButton disabled={!hasUnread} />

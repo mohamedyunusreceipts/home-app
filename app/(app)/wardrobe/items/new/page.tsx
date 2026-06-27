@@ -21,7 +21,7 @@ export default async function NewItemPage() {
   const { user } = await requireHousehold()
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-28">
       <div className="mx-auto max-w-2xl space-y-6">
         <header className="flex items-center justify-between">
           <h1 className="font-serif text-3xl text-terracotta-700">Add an item</h1>

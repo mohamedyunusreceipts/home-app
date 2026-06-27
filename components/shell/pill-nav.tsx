@@ -66,7 +66,8 @@ export function PillNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed bottom-[26px] left-1/2 z-30 flex -translate-x-1/2 items-center gap-0.5 rounded-[34px] border border-cream-300 bg-cream-50 px-[9px] py-[7px] shadow-[0_16px_36px_rgba(63,33,24,.24)] md:hidden"
+      className="fixed left-1/2 z-40 flex max-w-[calc(100vw-24px)] -translate-x-1/2 items-center gap-0.5 rounded-[34px] border border-cream-300 bg-cream-50 px-[9px] py-[7px] shadow-[0_16px_36px_rgba(63,33,24,.24)] md:hidden"
+      style={{ bottom: 'calc(26px + env(safe-area-inset-bottom))' }}
     >
       {PILL_ITEMS.slice(0, 2).map((item) => (
         <PillButton key={item.href} {...item} active={isActive(pathname, item.href)} />

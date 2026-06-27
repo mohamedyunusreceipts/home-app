@@ -26,7 +26,11 @@ export function SignInButton({ nextPath }: { nextPath?: string }) {
   }
 
   return (
-    <Button onClick={handleClick} disabled={pending}>
+    <Button
+      onClick={handleClick}
+      disabled={pending}
+      className="h-11 w-full"
+    >
       {pending ? 'Redirecting…' : 'Sign in with Google'}
     </Button>
   )

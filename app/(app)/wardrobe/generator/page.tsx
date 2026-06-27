@@ -24,7 +24,7 @@ export default async function GeneratorPage() {
   const aiItemLabels = display.map((d) => d.label)
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-28">
       <div className="mx-auto max-w-3xl space-y-6">
         <h1 className="font-serif text-3xl text-terracotta-700">Outfit generator</h1>
         <WardrobeTabs active="/wardrobe/generator" />

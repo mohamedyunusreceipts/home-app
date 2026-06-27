@@ -69,9 +69,13 @@ export default async function SettingsPage() {
 
         {/* Settings group: white card, rows divided by #F2EBDF. */}
         <section className="overflow-hidden rounded-[20px] border border-[#E8DFCE] bg-[#FFFDF9]">
-          <div className="flex items-center justify-between px-[18px] py-4">
-            <span className="text-sm font-semibold text-[#3F2118]">Push notifications</span>
-            <PushToggle />
+          <div className="flex items-center justify-between gap-3 px-[18px] py-4">
+            <span className="min-w-0 text-sm font-semibold text-[#3F2118]">Push notifications</span>
+            {/* Extend the 52x30 switch's tap target to >=44px tall without shifting
+                its visual position (the negative margin absorbs the padding). */}
+            <span className="-my-[7px] inline-flex shrink-0 items-center py-[7px]">
+              <PushToggle />
+            </span>
           </div>
           <SettingRow label="Reminders & nudges" />
           <SettingRow label="Help & feedback" />
