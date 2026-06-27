@@ -26,7 +26,7 @@ export function AcceptInviteForm({ token }: { token: string }) {
           {error}
         </p>
       )}
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button type="submit" disabled={pending} className="h-11 w-full">
         {pending ? 'Joining…' : 'Accept invite'}
       </Button>
     </form>

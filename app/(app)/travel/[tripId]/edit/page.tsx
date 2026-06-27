@@ -29,7 +29,7 @@ export default async function EditTripPage({
   if (!trip) notFound()
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-28">
       <div className="mx-auto max-w-2xl space-y-6">
         <header className="space-y-1">
           <Link

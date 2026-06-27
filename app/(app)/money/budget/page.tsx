@@ -48,7 +48,7 @@ export default async function BudgetPage() {
   ])
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-[120px]">
       <div className="mx-auto max-w-3xl space-y-6">
         <header className="flex items-center justify-between">
           <div>

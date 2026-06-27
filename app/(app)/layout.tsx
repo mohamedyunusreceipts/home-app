@@ -22,7 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <ShellProvider>
         {/* Desktop offset for the fixed sidebar; mobile bottom space clears the
             floating pill nav. Pages render their own <main>. */}
-        <div className="pb-28 md:pb-8 md:pl-56">{children}</div>
+        <div className="shell-content-pad md:pl-56">{children}</div>
       </ShellProvider>
     </div>
   )

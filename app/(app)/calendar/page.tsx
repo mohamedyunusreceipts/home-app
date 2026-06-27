@@ -37,7 +37,7 @@ export default async function CalendarPage() {
           action={
             <Link
               href="/calendar/birthdays"
-              className="inline-flex items-center rounded-full font-semibold transition-colors"
+              className="inline-flex min-h-[44px] items-center rounded-full font-semibold transition-colors"
               style={{
                 border: '1px solid #E8DFCE',
                 background: '#FFFDF9',

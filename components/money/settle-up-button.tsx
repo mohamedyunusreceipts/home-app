@@ -45,7 +45,7 @@ export function SettleUpButton({
 
   return (
     <div className="space-y-2.5">
-      <p className="font-serif text-[28px] font-semibold leading-none text-terracotta-700">
+      <p className="break-words font-serif text-[clamp(22px,7vw,28px)] font-semibold leading-none tabular-nums text-terracotta-700">
         {amountLabel}
       </p>
       <button

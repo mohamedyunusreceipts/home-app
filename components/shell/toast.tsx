@@ -10,8 +10,8 @@ export function Toast({ message }: { message: string }) {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-24 left-1/2 z-[70] flex -translate-x-1/2 items-center gap-[9px] whitespace-nowrap rounded-3xl bg-sage-700 px-[18px] py-[11px] text-sage-50 shadow-[0_12px_30px_rgba(0,0,0,.25)]"
-      style={{ animation: 'toastIn .25s ease' }}
+      className="fixed left-1/2 z-[70] flex max-w-[calc(100vw-24px)] -translate-x-1/2 items-center gap-[9px] whitespace-nowrap rounded-3xl bg-sage-700 px-[18px] py-[11px] text-sage-50 shadow-[0_12px_30px_rgba(0,0,0,.25)]"
+      style={{ bottom: 'calc(96px + env(safe-area-inset-bottom))', animation: 'toastIn .25s ease' }}
     >
       <svg
         width="17"

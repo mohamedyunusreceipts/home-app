@@ -23,7 +23,7 @@ export default async function LaundryPage() {
   const rows = items ?? []
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-28">
       <div className="mx-auto max-w-4xl space-y-6">
         <h1 className="font-serif text-3xl text-terracotta-700">Laundry-aware outfits</h1>
         <WardrobeTabs active="/wardrobe/laundry" />

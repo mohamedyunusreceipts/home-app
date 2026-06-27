@@ -7,7 +7,7 @@ export default async function NewTripPage() {
   await requireHousehold()
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-28">
       <div className="mx-auto max-w-2xl space-y-6">
         <header className="space-y-1">
           <Link href="/travel" className="text-sm text-sage-600 hover:text-terracotta-700">

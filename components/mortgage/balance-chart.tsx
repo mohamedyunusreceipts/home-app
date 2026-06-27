@@ -91,11 +91,11 @@ export function BalanceChart({ points }: BalanceChartProps) {
         </span>
       </div>
 
-      <div className="flex justify-between text-xs text-sage-600">
-        <span>
+      <div className="flex justify-between gap-3 text-xs text-sage-600">
+        <span className="min-w-0 break-words tabular-nums">
           {formatMonth(first.month)} · {formatZarRounded(first.actual)}
         </span>
-        <span>
+        <span className="min-w-0 break-words text-right tabular-nums">
           {formatMonth(last.month)} · {formatZarRounded(last.actual)}
         </span>
       </div>

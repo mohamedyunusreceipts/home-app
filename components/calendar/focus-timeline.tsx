@@ -135,12 +135,12 @@ export function FocusTimeline({ rows, year, month }: FocusTimelineProps) {
               key={cat}
               type="button"
               onClick={() => toggle(cat)}
-              className="inline-flex items-center gap-1.5"
+              className="inline-flex min-h-[44px] items-center gap-1.5"
               style={{
                 borderRadius: 999,
                 border: '1px solid #E8DFCE',
                 background: on ? '#FFFDF9' : 'transparent',
-                padding: '5px 11px',
+                padding: '5px 14px',
                 fontSize: 12,
                 fontWeight: 500,
                 color: on ? '#3F2118' : '#8a7163',
@@ -318,7 +318,7 @@ function EventRow({
       {isBirthday ? <CakeIcon /> : <CategoryDot category={row.category} />}
 
       <span
-        className="min-w-0 flex-1 truncate"
+        className="min-w-0 flex-1 break-words"
         style={{ fontWeight: 600, fontSize: 14, color: isBirthday ? '#793F2D' : '#3F2118' }}
       >
         {row.title}
@@ -391,6 +391,7 @@ function EventDetail({
               <button
                 type="button"
                 onClick={onEdit}
+                className="min-h-[44px]"
                 style={{ borderRadius: 999, border: '1px solid #E8DFCE', background: '#FFFDF9', padding: '7px 16px', fontSize: 13, fontWeight: 600, color: '#3F2118' }}
               >
                 Edit
@@ -401,6 +402,7 @@ function EventDetail({
             row.link && (
               <Link
                 href={row.link}
+                className="inline-flex min-h-[44px] items-center"
                 style={{ borderRadius: 999, background: '#C77B5C', padding: '7px 16px', fontSize: 13, fontWeight: 600, color: '#FFFDF9' }}
               >
                 Open in {meta.label}
@@ -410,6 +412,7 @@ function EventDetail({
           <button
             type="button"
             onClick={onClose}
+            className="min-h-[44px]"
             style={{ borderRadius: 999, padding: '7px 16px', fontSize: 13, fontWeight: 600, color: '#8a7163' }}
           >
             Close
@@ -426,6 +429,7 @@ function DeleteEventButton({ id, onDeleted }: { id: string; onDeleted: () => voi
     <button
       type="button"
       disabled={pending}
+      className="min-h-[44px]"
       onClick={async () => {
         setPending(true)
         const { deleteEventAction } = await import('@/app/(app)/calendar/actions')

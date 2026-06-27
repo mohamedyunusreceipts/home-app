@@ -149,7 +149,7 @@ export default async function MortgagePage() {
           <p className="text-[11px] font-semibold tracking-[0.07em] text-cream-50/85 uppercase">
             Available to redraw
           </p>
-          <p className="mt-2 font-serif text-[42px] leading-none font-semibold">
+          <p className="mt-2 break-words font-serif text-[clamp(30px,10vw,42px)] font-semibold leading-none tabular-nums">
             {formatZarRounded(redraw)}
           </p>
           <p className="mt-2 text-[13px] text-cream-50/90">
@@ -163,7 +163,7 @@ export default async function MortgagePage() {
             <p className="text-[11px] font-semibold tracking-[0.07em] text-sage-500 uppercase">
               Outstanding
             </p>
-            <p className="mt-1 font-serif text-[22px] font-semibold text-terracotta-900">
+            <p className="mt-1 break-words font-serif text-[clamp(16px,5.5vw,22px)] font-semibold tabular-nums text-terracotta-900">
               {formatZar(currentBalance)}
             </p>
           </div>
@@ -171,7 +171,7 @@ export default async function MortgagePage() {
             <p className="text-[11px] font-semibold tracking-[0.07em] text-sage-500 uppercase">
               Paid down
             </p>
-            <p className="mt-1 font-serif text-[22px] font-semibold text-terracotta-900">
+            <p className="mt-1 break-words font-serif text-[clamp(16px,5.5vw,22px)] font-semibold tabular-nums text-terracotta-900">
               {formatZar(principalPaidDown)}
             </p>
           </div>

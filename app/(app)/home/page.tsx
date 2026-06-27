@@ -126,7 +126,7 @@ export default async function HousePage() {
           <Link
             key={s.href}
             href={s.href}
-            className="rounded-full px-3.5 py-2 text-sm font-medium"
+            className="inline-flex min-h-[44px] items-center rounded-full px-3.5 py-2 text-sm font-medium"
             style={{
               background: '#FFFDF9',
               border: '1px solid #E8DFCE',

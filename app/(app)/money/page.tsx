@@ -165,7 +165,7 @@ export default async function MoneyPage() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-sage-200">
             Spent this month
           </p>
-          <p className="mt-1.5 font-serif text-[38px] font-semibold leading-none">
+          <p className="mt-1.5 break-words font-serif text-[clamp(28px,9vw,38px)] font-semibold leading-none tabular-nums">
             {formatZarRounded(monthTotal)}
           </p>
           <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/[0.18]">
@@ -190,7 +190,7 @@ export default async function MoneyPage() {
             </p>
             <div className="mt-2.5">
               {settled ? (
-                <p className="font-serif text-[28px] font-semibold leading-none text-terracotta-700">
+                <p className="break-words font-serif text-[clamp(22px,7vw,28px)] font-semibold leading-none tabular-nums text-terracotta-700">
                   {formatZar(0)}
                 </p>
               ) : (
@@ -207,7 +207,7 @@ export default async function MoneyPage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-sage-600">
               Due this week
             </p>
-            <p className="mt-2.5 font-serif text-[28px] font-semibold leading-none text-terracotta-900">
+            <p className="mt-2.5 break-words font-serif text-[clamp(22px,7vw,28px)] font-semibold leading-none tabular-nums text-terracotta-900">
               {formatZarRounded(dueTotal)}
             </p>
             <p className="mt-2 text-[13px] text-sage-600">
@@ -235,9 +235,9 @@ export default async function MoneyPage() {
                 const hot = p.ratio >= 0.75
                 return (
                   <li key={p.category} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-terracotta-900">{p.category}</span>
-                      <span className="text-sage-600">
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="min-w-0 truncate font-medium text-terracotta-900">{p.category}</span>
+                      <span className="shrink-0 tabular-nums text-sage-600">
                         {formatZar(p.spent)} / {formatZar(p.limit)}
                       </span>
                     </div>

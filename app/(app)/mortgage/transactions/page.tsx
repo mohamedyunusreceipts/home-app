@@ -30,7 +30,7 @@ export default async function MortgageTransactionsPage() {
   // No bond yet — warm empty state nudging to setup.
   if (!mortgage) {
     return (
-      <main className="min-h-screen p-8">
+      <main className="min-h-screen p-8 pb-[120px]">
         <div className="mx-auto max-w-2xl space-y-6">
           <h1 className="font-serif text-3xl text-terracotta-700">Contributions</h1>
           <Card>
@@ -121,7 +121,7 @@ export default async function MortgageTransactionsPage() {
   ]
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-[120px]">
       <div className="mx-auto max-w-3xl space-y-6">
         <header className="flex items-center justify-between">
           <h1 className="font-serif text-3xl text-terracotta-700">Contributions</h1>

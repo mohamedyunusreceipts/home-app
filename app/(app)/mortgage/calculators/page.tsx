@@ -70,7 +70,7 @@ export default async function MortgageCalculatorsPage() {
   }
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-[120px]">
       <div className="mx-auto max-w-4xl space-y-6">
         <header className="flex items-center justify-between">
           <h1 className="font-serif text-3xl text-terracotta-700">Calculators</h1>

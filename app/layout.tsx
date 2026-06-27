@@ -23,6 +23,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#C77B5C',
+  // Required for env(safe-area-inset-*) to resolve on iOS (notch / home indicator),
+  // which the floating pill nav, toast, and sheets rely on.
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

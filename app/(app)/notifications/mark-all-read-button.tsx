@@ -23,6 +23,7 @@ export function MarkAllReadButton({ disabled }: { disabled?: boolean }) {
       size="sm"
       onClick={handleClick}
       disabled={disabled || pending}
+      className="h-11 shrink-0 px-4"
     >
       {pending ? 'Marking…' : 'Mark all read'}
     </Button>

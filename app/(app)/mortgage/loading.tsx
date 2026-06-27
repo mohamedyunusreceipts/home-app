@@ -4,7 +4,7 @@ import { SkeletonStat } from '@/components/ui/page-skeleton'
 // Mirrors the bond page: headline stat, a 2x2 stat grid, then a chart card.
 export default function Loading() {
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8 pb-[120px]">
       <div className="mx-auto max-w-3xl space-y-6">
         <header className="space-y-2">
           <Skeleton className="h-9 w-2/5 bg-cream-300" />
