@@ -51,6 +51,14 @@ const MORE_ITEMS: MoreItem[] = [
     chipColor: '#C77B5C',
   },
   {
+    label: 'Salaah',
+    href: '/salaah',
+    // Crescent moon + a small clock hand — a simple prayer-times glyph.
+    icon: 'M20 14.5A7.5 7.5 0 1 1 9.5 4a6 6 0 1 0 10.5 10.5zM12 12.5l1.5 1',
+    chipBg: '#F1F5F1',
+    chipColor: '#5F8160',
+  },
+  {
     label: 'Settings',
     href: '/settings',
     icon: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM3 12h2m14 0h2M12 3v2m0 14v2',
