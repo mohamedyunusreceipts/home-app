@@ -48,12 +48,6 @@ export default function AppError({
                 Reference: <span className="font-mono">{error.digest}</span>
               </p>
             ) : null}
-            {error?.message ? (
-              <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words rounded-md bg-cream-100 p-3 text-left font-mono text-xs text-terracotta-700">
-                {error.name}: {error.message}
-                {error.stack ? `\n\n${error.stack}` : ''}
-              </pre>
-            ) : null}
             <div className="flex flex-wrap gap-3">
               {retry ? <Button onClick={() => retry()}>Try again</Button> : null}
               <Link href="/dashboard">

@@ -46,11 +46,11 @@ export function BudgetMealsPanel({ pantryNames }: { pantryNames: string[] }) {
       <AiSuggest
         kind="budget_meals"
         label="Suggest budget meals for the week"
-        buildContext={() => ({
+        context={{
           budget: budget.trim() || undefined,
           servings: servings.trim() ? Number(servings) : undefined,
           pantry: pantryNames,
-        })}
+        }}
       />
     </div>
   )

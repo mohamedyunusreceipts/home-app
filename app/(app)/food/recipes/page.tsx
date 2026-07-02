@@ -49,7 +49,7 @@ export default async function RecipesPage() {
             <AiSuggest
               kind="recipe_ideas"
               label="Suggest recipes from my pantry"
-              buildContext={() => ({ ingredients: pantryNames })}
+              context={{ ingredients: pantryNames }}
             />
           </CardContent>
         </Card>

@@ -48,10 +48,10 @@ export default async function GeneratorPage() {
           </CardHeader>
           <CardContent>
             <WardrobeAiSuggest
-              buildContext={() => ({
+              context={{
                 occasion: 'an everyday outfit',
                 items: aiItemLabels,
-              })}
+              }}
             />
           </CardContent>
         </Card>

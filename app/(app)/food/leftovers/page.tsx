@@ -54,7 +54,7 @@ export default async function LeftoversPage() {
             <AiSuggest
               kind="leftover_ideas"
               label="Suggest leftover ideas"
-              buildContext={() => ({ leftovers: leftoverNames, pantry: pantryNames })}
+              context={{ leftovers: leftoverNames, pantry: pantryNames }}
             />
           </CardContent>
         </Card>

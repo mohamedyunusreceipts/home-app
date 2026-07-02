@@ -15,12 +15,12 @@ import { Button } from '@/components/ui/button'
 export function AiSuggest({
   kind,
   label,
-  buildContext,
+  context,
 }: {
   kind: string
   label: string
-  /** Lazily build the context at click time (so it reflects latest props). */
-  buildContext: () => unknown
+  /** Serializable context object sent with the suggestion request. */
+  context: unknown
 }) {
   const [pending, setPending] = useState(false)
   const [result, setResult] = useState<string | null>(null)
@@ -34,7 +34,7 @@ export function AiSuggest({
       const res = await fetch('/api/ai/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind, context: buildContext() }),
+        body: JSON.stringify({ kind, context }),
       })
 
       if (res.status === 429) {

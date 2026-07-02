@@ -13,11 +13,11 @@ import { Button } from '@/components/ui/button'
  */
 export function WardrobeAiSuggest({
   label = 'Suggest an outfit with AI',
-  buildContext,
+  context,
 }: {
   label?: string
-  /** Lazily build the context at click time so it reflects current selections. */
-  buildContext: () => unknown
+  /** Serializable context object sent with the suggestion request. */
+  context: unknown
 }) {
   const [pending, setPending] = useState(false)
   const [result, setResult] = useState<string | null>(null)
@@ -31,7 +31,7 @@ export function WardrobeAiSuggest({
       const res = await fetch('/api/ai/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: 'wardrobe_outfit', context: buildContext() }),
+        body: JSON.stringify({ kind: 'wardrobe_outfit', context }),
       })
 
       if (res.status === 429) {
