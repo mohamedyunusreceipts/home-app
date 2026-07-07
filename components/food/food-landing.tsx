@@ -12,6 +12,7 @@ import {
   type PlanMap,
   type RecipeOption,
 } from '@/app/(app)/food/meal-plan-grid'
+import { MealCombobox } from '@/components/food/meal-combobox'
 
 const SLOT_LABEL: Record<MealSlot, string> = {
   breakfast: 'Breakfast',
@@ -30,8 +31,6 @@ export type DayPlan = {
 
 type EditTarget = { date: string; slot: MealSlot } | null
 
-const selectClass =
-  'w-full rounded-md border border-sage-300 bg-cream-50 px-2 py-1.5 text-sm text-sage-900 focus:border-terracotta-400 focus:outline-none focus:ring-2 focus:ring-terracotta-200 disabled:opacity-50'
 
 /**
  * Food landing — Focus Timeline redesign.
@@ -350,9 +349,6 @@ function MealEditor({
   onDone: () => void
   onCancel: () => void
 }) {
-  const listId = `catalogue-${date}-${slot}`
-  const meals = catalogue.filter((c) => c.kind === 'food')
-  const desserts = catalogue.filter((c) => c.kind === 'dessert')
   const [pending, setPending] = useState(false)
   const [recipeId, setRecipeId] = useState(current?.recipeId ?? '')
   const [freeText, setFreeText] = useState(current?.freeText ?? '')
@@ -371,48 +367,16 @@ function MealEditor({
 
   return (
     <div className="mt-2 space-y-1.5">
-      <select
-        aria-label={`${SLOT_LABEL[slot]} recipe`}
-        className={selectClass}
-        value={recipeId}
-        disabled={pending}
-        onChange={(e) => {
-          setRecipeId(e.target.value)
-          if (e.target.value) setFreeText('')
+      <MealCombobox
+        recipes={recipes}
+        catalogue={catalogue}
+        value={{ recipeId, freeText }}
+        onChange={(v) => {
+          setRecipeId(v.recipeId)
+          setFreeText(v.freeText)
         }}
-      >
-        <option value="">— recipe —</option>
-        {recipes.map((r) => (
-          <option key={r.id} value={r.id}>
-            {r.name}
-          </option>
-        ))}
-      </select>
-      {!recipeId && (
-        <>
-          <input
-            type="text"
-            aria-label={`${SLOT_LABEL[slot]} free text`}
-            placeholder={catalogue.length ? 'or type / pick a meal' : 'or type a meal'}
-            className={selectClass}
-            value={freeText}
-            disabled={pending}
-            maxLength={120}
-            list={catalogue.length ? listId : undefined}
-            onChange={(e) => setFreeText(e.target.value)}
-          />
-          {catalogue.length > 0 && (
-            <datalist id={listId}>
-              {meals.map((c) => (
-                <option key={c.id} value={c.name} />
-              ))}
-              {desserts.map((c) => (
-                <option key={c.id} value={c.name} label={`${c.name} (dessert)`} />
-              ))}
-            </datalist>
-          )}
-        </>
-      )}
+        disabled={pending}
+      />
       <div className="flex gap-2 pt-0.5">
         <button
           type="button"

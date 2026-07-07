@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { formatWeekday, formatDayMonth } from '@/components/food/format'
 import { MEAL_SLOTS, type MealSlot } from '@/components/food/types'
 import { assignMealAction, buildListFromWeekAction } from './actions'
+import { MealCombobox } from '@/components/food/meal-combobox'
 
 const SLOT_LABEL: Record<MealSlot, string> = {
   breakfast: 'Breakfast',
@@ -26,9 +27,6 @@ export type CatalogueOption = { id: string; kind: 'food' | 'dessert'; name: stri
 /** Map of `${date}|${slot}` → assignment. */
 export type PlanMap = Record<string, Assignment | undefined>
 
-const selectClass =
-  'w-full rounded-md border border-sage-300 bg-cream-50 px-2 py-1.5 text-sm text-sage-900 focus:border-terracotta-400 focus:outline-none focus:ring-2 focus:ring-terracotta-200 disabled:opacity-50'
-
 function SlotCell({
   date,
   slot,
@@ -44,9 +42,6 @@ function SlotCell({
   catalogue: CatalogueOption[]
   onSaved: () => void
 }) {
-  const listId = `catalogue-${date}-${slot}`
-  const meals = catalogue.filter((c) => c.kind === 'food')
-  const desserts = catalogue.filter((c) => c.kind === 'dessert')
   const [pending, setPending] = useState(false)
   const [recipeId, setRecipeId] = useState(current?.recipeId ?? '')
   const [freeText, setFreeText] = useState(current?.freeText ?? '')
@@ -65,48 +60,17 @@ function SlotCell({
 
   return (
     <div className="space-y-1.5">
-      <select
-        aria-label={`${SLOT_LABEL[slot]} recipe`}
-        className={selectClass}
-        value={recipeId}
-        disabled={pending}
-        onChange={(e) => {
-          setRecipeId(e.target.value)
-          if (e.target.value) setFreeText('')
+      <MealCombobox
+        recipes={recipes}
+        catalogue={catalogue}
+        value={{ recipeId, freeText }}
+        onChange={(v) => {
+          setRecipeId(v.recipeId)
+          setFreeText(v.freeText)
         }}
-      >
-        <option value="">— recipe —</option>
-        {recipes.map((r) => (
-          <option key={r.id} value={r.id}>
-            {r.name}
-          </option>
-        ))}
-      </select>
-      {!recipeId && (
-        <>
-          <input
-            type="text"
-            aria-label={`${SLOT_LABEL[slot]} free text`}
-            placeholder={catalogue.length ? 'or type / pick a meal' : 'or type a meal'}
-            className={selectClass}
-            value={freeText}
-            disabled={pending}
-            maxLength={120}
-            list={catalogue.length ? listId : undefined}
-            onChange={(e) => setFreeText(e.target.value)}
-          />
-          {catalogue.length > 0 && (
-            <datalist id={listId}>
-              {meals.map((c) => (
-                <option key={c.id} value={c.name} />
-              ))}
-              {desserts.map((c) => (
-                <option key={c.id} value={c.name} label={`${c.name} (dessert)`} />
-              ))}
-            </datalist>
-          )}
-        </>
-      )}
+        disabled={pending}
+        placeholder="Search or type…"
+      />
       <Button
         type="button"
         size="xs"
