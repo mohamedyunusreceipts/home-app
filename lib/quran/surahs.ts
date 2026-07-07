@@ -97,11 +97,17 @@ export interface Level {
   status: LevelStatus
   /** Route this level links to when ready, else null. */
   href: string | null
+  /**
+   * Id recorded in quran_progress.completed_lessons when this level's lesson is
+   * finished. Null for levels that aren't a single completable lesson (5, 6).
+   */
+  lessonId: string | null
 }
 
 /**
- * The learning ladder. Levels 1-4 are built in later phases (coming-soon);
- * Level 5 (Reading) and Level 6 (Ḥifẓ) ship in Phase Q1.
+ * The learning ladder. All six levels ship as of Phase Q3.
+ * Levels 1-4 (basics + tajwīd) live under /quran/learn/*; Level 5 (Reading)
+ * and Level 6 (Ḥifẓ) shipped in Phase Q1.
  */
 export const LEVELS: readonly Level[] = [
   {
@@ -109,32 +115,36 @@ export const LEVELS: readonly Level[] = [
     title: 'Letters',
     arabicLabel: 'Ḥurūf',
     description: 'Recognise and name the Arabic letters.',
-    status: 'coming-soon',
-    href: null,
+    status: 'ready',
+    href: '/quran/learn/letters',
+    lessonId: 'level-1-letters',
   },
   {
     level: 2,
     title: 'Vowels & sounds',
     arabicLabel: 'Ḥarakāt',
     description: 'Short vowels, tanwīn, and letter sounds.',
-    status: 'coming-soon',
-    href: null,
+    status: 'ready',
+    href: '/quran/learn/vowels',
+    lessonId: 'level-2-vowels',
   },
   {
     level: 3,
     title: 'Joining words',
     arabicLabel: 'Waṣl',
     description: 'Connect letters and read whole words.',
-    status: 'coming-soon',
-    href: null,
+    status: 'ready',
+    href: '/quran/learn/joining',
+    lessonId: 'level-3-joining',
   },
   {
     level: 4,
     title: 'Tajwīd',
     arabicLabel: 'Tajwīd',
     description: 'Rules of correct, beautiful recitation.',
-    status: 'coming-soon',
-    href: null,
+    status: 'ready',
+    href: '/quran/learn/tajweed',
+    lessonId: 'level-4-tajweed',
   },
   {
     level: 5,
@@ -143,6 +153,7 @@ export const LEVELS: readonly Level[] = [
     description: 'Read along with the text and audio.',
     status: 'ready',
     href: '/quran/read',
+    lessonId: null,
   },
   {
     level: 6,
@@ -151,6 +162,7 @@ export const LEVELS: readonly Level[] = [
     description: 'Memorise and track your revision.',
     status: 'ready',
     href: '/quran/hifz',
+    lessonId: null,
   },
 ]
 
