@@ -36,6 +36,7 @@
 
   --font-serif: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-arabic: var(--font-amiri), 'Scheherazade New', 'Traditional Arabic', serif;
 }
 
 /* Mobile content clearance backstop: keep page content above the floating pill

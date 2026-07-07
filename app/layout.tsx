@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Fraunces, Inter } from 'next/font/google'
+import { Fraunces, Inter, Amiri } from 'next/font/google'
 import './globals.css'
 import { SwRegister } from '@/components/shell/sw-register'
 import { InstallPrompt } from '@/components/shell/install-prompt'
@@ -13,6 +13,14 @@ const fraunces = Fraunces({
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+})
+
+// Amiri — a classical Naskh typeface for rendering Qur'anic Arabic (ayah text).
+const amiri = Amiri({
+  subsets: ['arabic'],
+  weight: ['400', '700'],
+  variable: '--font-amiri',
   display: 'swap',
 })
 
@@ -30,7 +38,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
+    <html lang="en" className={`${fraunces.variable} ${inter.variable} ${amiri.variable}`}>
       <body className="font-sans antialiased">
         <SwRegister />
         {children}

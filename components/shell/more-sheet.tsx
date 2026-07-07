@@ -59,6 +59,14 @@ const MORE_ITEMS: MoreItem[] = [
     chipColor: '#5F8160',
   },
   {
+    label: "Qur'an",
+    href: '/quran',
+    // An open book with a small crescent above it — a Qur'an learning glyph.
+    icon: 'M12 7c-2-1.3-4.5-1.3-7 0v11c2.5-1.3 5-1.3 7 0m0-11c2-1.3 4.5-1.3 7 0v11c-2.5-1.3-5-1.3-7 0m0-11V18M9 4.2A2.6 2.6 0 1 0 12 5',
+    chipBg: '#F1F5F1',
+    chipColor: '#5F8160',
+  },
+  {
     label: 'Settings',
     href: '/settings',
     icon: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM3 12h2m14 0h2M12 3v2m0 14v2',
