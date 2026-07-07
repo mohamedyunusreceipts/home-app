@@ -1,7 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { addExpenseAction } from './actions'
 import { parseReceiptResult } from '@/components/money/receipt'
@@ -21,9 +22,14 @@ type Props = {
 
 export function ExpenseForm({ members, currentUserId, categories, today }: Props) {
   const router = useRouter()
+  // The other household member (for the split); empty if the household is still
+  // solo (partner hasn't joined yet), in which case splitting isn't possible.
+  const partnerUserId = members.find((m) => m.userId !== currentUserId)?.userId ?? ''
+  const hasPartner = partnerUserId !== ''
+
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
-  const [splitType, setSplitType] = useState<SplitType>('equal')
+  const [splitType, setSplitType] = useState<SplitType>(hasPartner ? 'equal' : 'me_only')
 
   // Receipt OCR state.
   const [ocrBusy, setOcrBusy] = useState(false)
@@ -35,12 +41,6 @@ export function ExpenseForm({ members, currentUserId, categories, today }: Props
   const [date, setDate] = useState(today)
   const [category, setCategory] = useState(categories[0] ?? 'Other')
   const [description, setDescription] = useState('')
-
-  // The other household member (for the split). Falls back to current user.
-  const partnerUserId = useMemo(
-    () => members.find((m) => m.userId !== currentUserId)?.userId ?? '',
-    [members, currentUserId],
-  )
 
   async function handleReceipt(file: File) {
     setOcrBusy(true)
@@ -244,13 +244,28 @@ export function ExpenseForm({ members, currentUserId, categories, today }: Props
             value={splitType}
             onChange={(e) => setSplitType(e.target.value as SplitType)}
             className={inputClass}
-            disabled={pending}
+            disabled={pending || !hasPartner}
           >
-            <option value="equal">Equal (50 / 50)</option>
-            <option value="me_only">Payer only</option>
-            <option value="partner_only">Other person only</option>
-            <option value="custom_amount">Custom amounts</option>
+            {hasPartner ? (
+              <>
+                <option value="equal">Equal (50 / 50)</option>
+                <option value="me_only">Payer only</option>
+                <option value="partner_only">Other person only</option>
+                <option value="custom_amount">Custom amounts</option>
+              </>
+            ) : (
+              <option value="me_only">Just me</option>
+            )}
           </select>
+          {!hasPartner && (
+            <p className="text-xs text-sage-600">
+              Splitting needs both of you —{' '}
+              <Link href="/settings" className="text-terracotta-600 hover:underline">
+                invite your partner
+              </Link>{' '}
+              to split expenses.
+            </p>
+          )}
         </div>
 
         <div className="space-y-2 sm:col-span-2">

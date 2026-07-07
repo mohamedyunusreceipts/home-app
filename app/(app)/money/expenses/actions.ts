@@ -45,7 +45,9 @@ export async function addExpenseAction(formData: FormData): Promise<AddExpenseRe
   // The "me" side of the split is the paying user; the partner is the other member.
   // partner_user_id is supplied by the form (it knows the household's two members).
   if (splitType !== 'me_only' && !partnerUserId) {
-    return { error: 'Could not determine the other household member for this split.' }
+    return {
+      error: 'Splitting needs a second person — invite your partner from Settings, then try again.',
+    }
   }
 
   let custom: CustomAmounts | undefined
