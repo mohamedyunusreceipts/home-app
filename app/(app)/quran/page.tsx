@@ -11,6 +11,7 @@ interface HifzRow {
 
 interface ProgressRow {
   current_level: number
+  completed_lessons: string[] | null
 }
 
 export default async function QuranPage() {
@@ -26,7 +27,7 @@ export default async function QuranPage() {
       .returns<HifzRow[]>(),
     supabase
       .from('quran_progress')
-      .select('current_level')
+      .select('current_level, completed_lessons')
       .eq('user_id', user.id)
       .maybeSingle<ProgressRow>(),
   ])
@@ -35,6 +36,7 @@ export default async function QuranPage() {
   const learningRow = (hifzRows ?? []).find((r) => r.status === 'learning')
   const continueSurah = learningRow?.surah_number ?? null
   const currentLevel = progress?.current_level ?? 5
+  const completedLessons = new Set(progress?.completed_lessons ?? [])
 
   return (
     <main className="min-h-screen px-[22px] pt-2 pb-[120px]">
@@ -78,17 +80,36 @@ export default async function QuranPage() {
           {LEVELS.map((lvl) => {
             const isReady = lvl.status === 'ready'
             const isCurrent = lvl.level === currentLevel && isReady
+            const isDone = lvl.lessonId != null && completedLessons.has(lvl.lessonId)
 
             const inner = (
               <div className="flex items-center gap-3.5">
                 <span
                   className={`flex size-[38px] shrink-0 items-center justify-center rounded-full font-serif text-[16px] font-semibold ${
-                    isReady
-                      ? 'bg-[#F1F5F1] text-[#3B523C]'
-                      : 'bg-cream-200 text-[#8a7163]'
+                    isDone
+                      ? 'bg-[#7A9B7A] text-cream-50'
+                      : isReady
+                        ? 'bg-[#F1F5F1] text-[#3B523C]'
+                        : 'bg-cream-200 text-[#8a7163]'
                   }`}
                 >
-                  {lvl.level}
+                  {isDone ? (
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                  ) : (
+                    lvl.level
+                  )}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -105,7 +126,11 @@ export default async function QuranPage() {
                     >
                       {lvl.arabicLabel}
                     </span>
-                    {isCurrent ? (
+                    {isDone ? (
+                      <span className="rounded-full bg-[#F1F5F1] px-2 py-0.5 text-[10px] font-semibold tracking-wide text-sage-600 uppercase">
+                        Done
+                      </span>
+                    ) : isCurrent ? (
                       <span className="rounded-full bg-[#F1F5F1] px-2 py-0.5 text-[10px] font-semibold tracking-wide text-sage-600 uppercase">
                         Current
                       </span>
