@@ -65,6 +65,31 @@ export type SavingsGoalRow = {
   drive_image_id: string | null
 }
 
+export type SettlementRow = {
+  id: string
+  household_id: string
+  from_user_id: string
+  to_user_id: string
+  amount: number
+  note: string | null
+  occurred_on: string
+  created_at: string
+}
+
+export type SettlementPlanRow = {
+  id: string
+  household_id: string
+  from_user_id: string
+  to_user_id: string
+  installment_amount: number
+  recurrence_rrule: string
+  next_due: string
+  last_reminded_on: string | null
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
 /** A household member with a resolved display name (for payer/split UIs). */
 export type MemberOption = {
   userId: string
