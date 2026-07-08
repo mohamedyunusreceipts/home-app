@@ -5,6 +5,7 @@ import { ScreenHeader } from '@/components/shell/screen-header'
 import { PushToggle } from '@/components/shell/push-toggle'
 import { HouseholdCard } from './household-card'
 import { DriveCard } from './drive-card'
+import { LeaveHousehold } from './leave-household'
 import { signOutAction } from './actions'
 
 type MemberRow = {
@@ -66,6 +67,8 @@ export default async function SettingsPage() {
           initialToken={existingInvite?.token ?? null}
           canInvite={!hasPartner}
         />
+
+        <LeaveHousehold />
 
         {/* Settings group: white card, rows divided by #F2EBDF. */}
         <section className="overflow-hidden rounded-[20px] border border-[#E8DFCE] bg-[#FFFDF9]">
