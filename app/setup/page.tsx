@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { requireUser } from '@/lib/auth/redirects'
 import { getCurrentHouseholdId } from '@/lib/auth/current-household'
+import { JoinInput } from './join-input'
 
 export default async function SetupPage() {
   await requireUser()
@@ -20,20 +20,37 @@ export default async function SetupPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <p className="text-sage-700">
-            Two ways to start: create a new household, or join the one your partner
-            already created using their invite link.
-          </p>
+          {/* Primary path: join your partner's existing household. */}
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold text-sage-800">Joining your partner?</h2>
+              <p className="mt-1 text-sm text-sage-600">
+                Paste the invite link or code they generated in Settings &rarr; Invite.
+              </p>
+            </div>
+            <JoinInput />
+          </section>
 
-          <div className="space-y-3">
-            <Link href="/setup/create" className="block">
-              <Button className="h-11 w-full">Create a new household</Button>
-            </Link>
-            <p className="text-sm text-sage-600 text-center">
-              Or paste the invite link your partner shared with you into your browser to
-              join their household.
-            </p>
+          {/* Divider. */}
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-sage-200" />
+            <span className="text-xs uppercase tracking-wide text-sage-400">or</span>
+            <span className="h-px flex-1 bg-sage-200" />
           </div>
+
+          {/* Secondary path: create a brand-new household. */}
+          <section className="space-y-2">
+            <Link
+              href="/setup/create"
+              className="block rounded-md border border-sage-300 bg-cream-50 px-4 py-3 text-center text-sm font-semibold text-sage-800 transition-colors hover:bg-cream-100"
+            >
+              Start a new household
+            </Link>
+            <p className="text-xs text-sage-500">
+              Only do this if your partner hasn&apos;t set one up yet &mdash; otherwise ask them for
+              an invite link so you don&apos;t end up in separate households.
+            </p>
+          </section>
         </CardContent>
       </Card>
     </main>

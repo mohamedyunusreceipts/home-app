@@ -42,6 +42,19 @@ export async function disconnectDriveAction(): Promise<{ error: string } | { ok:
   return { ok: true }
 }
 
+/**
+ * Leave the caller's household via the leave_household() RPC. Removes their
+ * membership; if they were the last member the household and all its shared data
+ * are deleted; if they were the owner ownership transfers to the remaining
+ * member. On success they land on /setup to create or join another household.
+ */
+export async function leaveHouseholdAction(): Promise<{ error: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('leave_household')
+  if (error) return { error: error.message }
+  redirect('/setup')
+}
+
 export async function signOutAction() {
   const supabase = await createClient()
   await supabase.auth.signOut()
