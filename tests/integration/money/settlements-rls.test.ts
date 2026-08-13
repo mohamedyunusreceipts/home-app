@@ -38,7 +38,9 @@ describe('RLS — settlements isolation (0024_settlements)', () => {
 
     const { data: rows } = await a.client.from('settlements').select('*')
     expect(rows).toHaveLength(1)
-    expect(rows![0]!.amount).toBe('120.00')
+    // numeric(…) comes back as a JS number via PostgREST (120) but as a string
+    // ('120.00') over a raw pg connection — compare by value, not representation.
+    expect(Number(rows![0]!.amount)).toBe(120)
   })
 
   it("household B cannot read or write household A's settlements", async () => {
