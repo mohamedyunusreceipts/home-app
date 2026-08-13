@@ -1,8 +1,16 @@
 import { ScreenHeader } from '@/components/shell/screen-header'
 import { requireHousehold } from '@/lib/auth/redirects'
 import { createClient } from '@/lib/supabase/server'
-import { type HifzStatus } from '@/lib/quran/surahs'
+import { SURAHS, type HifzStatus } from '@/lib/quran/surahs'
 import { HifzClient, type HifzState } from './hifz-client'
+
+// Lightweight surah metadata (no ayah text) so the full dataset stays server-side
+// and never ships to the client bundle.
+const SURAH_META = SURAHS.map((s) => ({
+  number: s.number,
+  name: s.name,
+  englishName: s.englishName,
+}))
 
 interface HifzRow {
   surah_number: number
@@ -31,7 +39,7 @@ export default async function HifzPage() {
     <main className="min-h-screen px-[22px] pt-2 pb-[120px]">
       <div className="mx-auto max-w-2xl">
         <ScreenHeader title="Ḥifẓ" />
-        <HifzClient initial={initial} />
+        <HifzClient initial={initial} surahs={SURAH_META} />
       </div>
     </main>
   )

@@ -1,7 +1,7 @@
 // Tajwīd rules dataset for ladder level 4 (Phase Q3).
 //
 // Definitions are the core, widely-taught set. Every example references a real
-// ayah from the bundled SURAHS (Al-Fātiḥah + Juz ʿAmma) so the ayah text can be
+// ayah from the bundled SURAHS (all 114 surahs) so the ayah text can be
 // shown from the dataset and its audio played via audioUrl. A unit test guards
 // that every { surah, ayah } here exists in SURAHS.
 

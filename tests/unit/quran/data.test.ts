@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest'
 import { SURAHS, getSurah, audioUrl } from '@/lib/quran/surahs'
 
 describe("Qur'an dataset", () => {
-  it('contains exactly 38 sūrahs (Al-Fātiḥah + Juz ʿAmma)', () => {
-    expect(SURAHS).toHaveLength(38)
+  it('contains all 114 sūrahs with 6,236 āyāt total', () => {
+    expect(SURAHS).toHaveLength(114)
+    const total = SURAHS.reduce((n, s) => n + s.ayahs.length, 0)
+    expect(total).toBe(6236)
   })
 
   it('Al-Fātiḥah has 7 āyāt and bismillah=false', () => {
@@ -11,6 +13,13 @@ describe("Qur'an dataset", () => {
     expect(fatiha).toBeDefined()
     expect(fatiha!.ayahs).toHaveLength(7)
     expect(fatiha!.bismillah).toBe(false)
+  })
+
+  it('Al-Baqarah has 286 āyāt; At-Tawbah has 129 āyāt and no bismillah', () => {
+    expect(getSurah(2)!.ayahs).toHaveLength(286)
+    const tawbah = getSurah(9)!
+    expect(tawbah.ayahs).toHaveLength(129)
+    expect(tawbah.bismillah).toBe(false)
   })
 
   it('An-Nās has 6 āyāt and bismillah=true', () => {

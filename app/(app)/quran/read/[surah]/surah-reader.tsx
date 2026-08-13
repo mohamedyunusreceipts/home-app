@@ -8,7 +8,7 @@ import {
   audioUrl,
   type Surah,
   type HifzStatus,
-} from '@/lib/quran/surahs'
+} from '@/lib/quran/meta'
 import { setHifzStatus } from '../../actions'
 
 /** Convert a Western integer to Arabic-Indic digits (٠١٢…) for the ayah marker. */

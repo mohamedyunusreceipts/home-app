@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useShell } from '@/components/shell/shell-context'
-import { audioUrl, DEFAULT_RECITER } from '@/lib/quran/surahs'
+import { audioUrl, DEFAULT_RECITER } from '@/lib/quran/meta'
 import type { TajweedRule } from '@/lib/quran/tajweed'
 
 /** An example enriched (on the server) with the ayah's Arabic text + surah name. */

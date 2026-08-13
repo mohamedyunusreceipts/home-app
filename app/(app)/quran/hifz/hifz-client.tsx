@@ -3,13 +3,17 @@
 import { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useShell } from '@/components/shell/shell-context'
-import { SURAHS, type HifzStatus } from '@/lib/quran/surahs'
+import { type HifzStatus } from '@/lib/quran/meta'
 import { setHifzStatus, markRevisedToday } from '../actions'
 
 export interface HifzState {
   status: HifzStatus
   lastRevisedOn: string | null
 }
+
+/** Lightweight surah metadata passed from the server (keeps the full dataset out
+ * of the client bundle). */
+export type SurahMeta = { number: number; name: string; englishName: string }
 
 /** Format an ISO date (YYYY-MM-DD) as "6 Jul 2026", or a fallback. */
 function formatRevised(iso: string | null): string {
@@ -25,7 +29,13 @@ function formatRevised(iso: string | null): string {
 
 type Bucket = 'memorised' | 'learning' | 'not-started'
 
-export function HifzClient({ initial }: { initial: Record<number, HifzState> }) {
+export function HifzClient({
+  initial,
+  surahs,
+}: {
+  initial: Record<number, HifzState>
+  surahs: SurahMeta[]
+}) {
   const { showToast } = useShell()
   const [pending, startTransition] = useTransition()
   const [state, setState] = useState<Record<number, HifzState>>(initial)
@@ -34,14 +44,14 @@ export function HifzClient({ initial }: { initial: Record<number, HifzState> }) 
     const memorised: number[] = []
     const learning: number[] = []
     const notStarted: number[] = []
-    for (const surah of SURAHS) {
+    for (const surah of surahs) {
       const s = state[surah.number]?.status
       if (s === 'memorised') memorised.push(surah.number)
       else if (s === 'learning') learning.push(surah.number)
       else notStarted.push(surah.number)
     }
     return { memorised, learning, notStarted }
-  }, [state])
+  }, [state, surahs])
 
   function changeStatus(surahNumber: number, next: HifzStatus) {
     const prev = state[surahNumber] ?? null
@@ -92,7 +102,7 @@ export function HifzClient({ initial }: { initial: Record<number, HifzState> }) 
   }
 
   function surahName(n: number): { english: string; arabic: string } {
-    const s = SURAHS.find((x) => x.number === n)
+    const s = surahs.find((x) => x.number === n)
     return { english: s?.englishName ?? `Sūrah ${n}`, arabic: s?.name ?? '' }
   }
 
@@ -166,7 +176,7 @@ export function HifzClient({ initial }: { initial: Record<number, HifzState> }) 
     )
   }
 
-  const total = SURAHS.length
+  const total = surahs.length
 
   const section = (title: string, bucket: Bucket, ids: number[]) =>
     ids.length > 0 ? (
