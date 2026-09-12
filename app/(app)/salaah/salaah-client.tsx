@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useShell } from '@/components/shell/shell-context'
 import { PushToggle } from '@/components/shell/push-toggle'
 import {
@@ -207,6 +208,45 @@ export function SalaahClient({ initial }: { initial: SalaahSettings }) {
           {locationName}
         </p>
       </section>
+
+      {/* Qibla direction — links to the compass. */}
+      <Link
+        href="/qibla"
+        className="flex items-center gap-3 rounded-[20px] border border-cream-300 bg-cream-50 p-[16px] transition-colors hover:bg-cream-100"
+      >
+        <span className="flex size-[40px] shrink-0 items-center justify-center rounded-xl bg-[#F1F5F1]">
+          <svg
+            width="21"
+            height="21"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#5F8160"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM15.5 8.5l-2 5-5 2 2-5z" />
+          </svg>
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15px] font-semibold text-terracotta-900">Qibla</span>
+          <span className="block text-[12px] text-[#8a7163]">Find the direction to Makkah</span>
+        </span>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#C0AE93"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M9 6l6 6-6 6" />
+        </svg>
+      </Link>
 
       {/* Today's times. */}
       <section className="rounded-[20px] border border-cream-300 bg-cream-50 p-[18px]">
