@@ -59,6 +59,14 @@ const MORE_ITEMS: MoreItem[] = [
     chipColor: '#5F8160',
   },
   {
+    label: 'Qibla',
+    href: '/qibla',
+    // Compass: outer ring + a diamond needle pointing NE.
+    icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM15.5 8.5l-2 5-5 2 2-5z',
+    chipBg: '#F1F5F1',
+    chipColor: '#5F8160',
+  },
+  {
     label: "Qur'an",
     href: '/quran',
     // An open book with a small crescent above it — a Qur'an learning glyph.
