@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { dayKey, daysUntil } from '@/lib/mba/dates'
 import { fmtDay, fmtTime } from '@/lib/mba/format'
+import { overlapping, rangeStatus, type KeyDate } from '@/lib/mba/key-dates'
 import { Card, CourseChip, Icon, ICONS, KindLabel, SectionTitle } from './parts'
+import { KIND_STYLE } from './programme-dates'
 import type { CourseVM, DeadlineVM, EventVM, SessionVM } from './types'
 
 type Item =
@@ -18,14 +20,22 @@ export function AgendaSection({
   sessions,
   meetings,
   deadlines,
+  keyDates,
   courseMap,
 }: {
   now: Date
   sessions: SessionVM[]
   meetings: EventVM[]
   deadlines: DeadlineVM[]
+  keyDates: KeyDate[]
   courseMap: Map<string, CourseVM>
 }) {
+  // Blocks, breaks and milestones touching this week (online periods are
+  // implied by the lectures themselves).
+  const weekStart = dayKey(now)
+  const weekEnd = dayKey(new Date(now.getTime() + (DAYS_AHEAD - 1) * 86_400_000))
+  const banners = overlapping(keyDates, weekStart, weekEnd).filter((k) => k.kind !== 'online')
+
   const inRange = (iso: string) => {
     const d = daysUntil(new Date(iso), now)
     return d >= 0 && d < DAYS_AHEAD
@@ -52,6 +62,19 @@ export function AgendaSection({
   return (
     <Card>
       <SectionTitle>This week</SectionTitle>
+      {banners.length ? (
+        <ul className="mt-3 space-y-1.5">
+          {banners.map((k) => (
+            <li key={k.id} className="flex items-center gap-2 rounded-[12px] bg-cream-100 px-3 py-2">
+              <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${KIND_STYLE[k.kind].className}`}>
+                {KIND_STYLE[k.kind].label}
+              </span>
+              <span className="min-w-0 truncate text-[13px] font-semibold text-terracotta-900">{k.title}</span>
+              <span className="ml-auto shrink-0 text-[12px] text-[#8a7163]">{rangeStatus(k, weekStart)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {items.length === 0 ? (
         <p className="mt-3 text-[14px] text-[#8a7163]">
           Nothing scheduled in the next 7 days. A good week to get ahead on readings.

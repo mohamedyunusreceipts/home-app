@@ -9,7 +9,9 @@ import { AgendaSection } from './agenda-section'
 import { DeadlinesSection } from './deadlines-section'
 import { LecturesSection } from './lectures-section'
 import { FeedsCard } from './feeds-card'
+import { ProgrammeDatesCard } from './programme-dates'
 import { buildStats, upcomingSessions } from './stats'
+import type { KeyDate } from '@/lib/mba/key-dates'
 import type { CourseVM, DeadlineVM, EventVM, FeedVM, SessionVM } from './types'
 
 export function MbaClient({
@@ -19,6 +21,7 @@ export function MbaClient({
   deadlines,
   meetings,
   feeds,
+  keyDates,
 }: {
   nowIso: string
   courses: CourseVM[]
@@ -26,6 +29,7 @@ export function MbaClient({
   deadlines: DeadlineVM[]
   meetings: EventVM[]
   feeds: FeedVM[]
+  keyDates: KeyDate[]
 }) {
   const router = useRouter()
   const { showToast } = useShell()
@@ -118,6 +122,7 @@ export function MbaClient({
       deadlines={allDeadlines}
       meetings={meetings}
       feeds={feeds}
+      keyDates={keyDates}
       courseFilter={courseFilter}
       onCourseFilter={setCourseFilter}
       onTogglePrepared={togglePrepared}
@@ -136,6 +141,7 @@ export function MbaScreen({
   deadlines,
   meetings,
   feeds,
+  keyDates,
   courseFilter,
   onCourseFilter,
   onTogglePrepared,
@@ -149,6 +155,7 @@ export function MbaScreen({
   deadlines: DeadlineVM[]
   meetings: EventVM[]
   feeds: FeedVM[]
+  keyDates: KeyDate[]
   courseFilter: string | null
   onCourseFilter: (code: string | null) => void
   onTogglePrepared: (id: string, prepared: boolean) => void
@@ -163,7 +170,14 @@ export function MbaScreen({
       {next ? <NextLectureHero session={next} now={now} /> : null}
       <StatsRow stats={buildStats(sessions, deadlines, now)} />
 
-      <AgendaSection now={now} sessions={sessions} meetings={meetings} deadlines={deadlines} courseMap={courseMap} />
+      <AgendaSection
+        now={now}
+        sessions={sessions}
+        meetings={meetings}
+        deadlines={deadlines}
+        keyDates={keyDates}
+        courseMap={courseMap}
+      />
 
       {courses.length > 1 ? (
         <div className="-mx-[22px] overflow-x-auto px-[22px] pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -199,6 +213,7 @@ export function MbaScreen({
         onToggleDone={onToggleDone}
       />
       <LecturesSection now={now} sessions={filteredSessions} courseMap={courseMap} onTogglePrepared={onTogglePrepared} />
+      <ProgrammeDatesCard keyDates={keyDates} now={now} />
       <FeedsCard feeds={feeds} />
     </div>
   )

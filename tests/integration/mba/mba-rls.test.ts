@@ -121,6 +121,24 @@ describe('RLS — MBA per-user isolation (0025_mba)', () => {
     }
   })
 
+  it('programme key dates (0026) are private to their owner', async () => {
+    const { userA, clientA, clientB } = await twoUsersSameHousehold()
+    const { error } = await clientA.from('mba_key_dates').insert({
+      user_id: userA.id,
+      external_uid: 'y2-block4',
+      title: 'Block 4',
+      kind: 'in_person',
+      start_date: '2027-02-03',
+      end_date: '2027-02-07',
+      leave_days: 2.5,
+      programme_year: 2,
+    })
+    expect(error).toBeNull()
+    expect((await clientB.from('mba_key_dates').select('id')).data).toEqual([])
+    const { data } = await clientA.from('mba_key_dates').select('leave_days').single()
+    expect(Number(data!.leave_days)).toBe(2.5)
+  })
+
   it('cannot insert rows on behalf of another user', async () => {
     const { userA, clientB } = await twoUsersSameHousehold()
     const { error } = await clientB.from('mba_deadlines').insert({

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { mergeDeadlines, type DeadlineKind, type DeadlineSource } from '@/lib/mba/classify'
 import { matchEventsToSessions } from '@/lib/mba/agenda'
 import type { FeedKind } from '@/lib/mba/sync-calendar'
+import type { KeyDate, KeyDateKind } from '@/lib/mba/key-dates'
 import { MbaClient } from './mba-client'
 import type { CourseVM, DeadlineVM, EventVM, FeedVM, ReadingVM, SessionVM } from './types'
 
@@ -14,7 +15,7 @@ export default async function MbaPage() {
   const supabase = await createClient()
   const now = new Date()
 
-  const [courses, sessions, deadlines, events, feeds] = await Promise.all([
+  const [courses, sessions, deadlines, events, feeds, keyDates] = await Promise.all([
     supabase
       .from('mba_courses')
       .select('code, name, convenor, color')
@@ -43,7 +44,24 @@ export default async function MbaPage() {
       .from('mba_calendar_feeds')
       .select('kind, url, last_synced_at, last_sync_error, last_sync_count')
       .eq('user_id', user.id),
+    supabase
+      .from('mba_key_dates')
+      .select('id, title, kind, start_date, end_date, leave_days, programme_year, notes')
+      .eq('user_id', user.id)
+      .order('start_date'),
   ])
+
+  const keyDateVMs: KeyDate[] = (keyDates.data ?? []).map((k) => ({
+    id: k.id,
+    title: k.title,
+    kind: k.kind as KeyDateKind,
+    startDate: k.start_date,
+    endDate: k.end_date,
+    // numeric columns arrive as numbers via PostgREST, but coerce defensively.
+    leaveDays: k.leave_days == null ? null : Number(k.leave_days),
+    year: k.programme_year,
+    notes: k.notes,
+  }))
 
   const eventVMs: EventVM[] = (events.data ?? []).map((e) => ({
     id: e.id,
@@ -114,6 +132,7 @@ export default async function MbaPage() {
           deadlines={deadlineVMs}
           meetings={eventVMs.filter((e) => !matchedEventIds.has(e.id))}
           feeds={feedVMs}
+          keyDates={keyDateVMs}
         />
       </div>
     </main>

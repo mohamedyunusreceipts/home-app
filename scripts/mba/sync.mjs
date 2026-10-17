@@ -266,6 +266,30 @@ if (!DRY) {
     'deadlines',
   )
 
+  // Programme key dates (blocks, breaks, milestones).
+  const KEY_KINDS = new Set(['in_person', 'hybrid', 'online', 'break', 'optional', 'milestone'])
+  const keyDates = (cfg.keyDates ?? []).map((k) => {
+    if (!KEY_KINDS.has(k.kind)) throw new Error(`keyDates "${k.id}": unknown kind "${k.kind}"`)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k.start) || (k.end && !/^\d{4}-\d{2}-\d{2}$/.test(k.end))) {
+      throw new Error(`keyDates "${k.id}": dates must be YYYY-MM-DD`)
+    }
+    return {
+      user_id: userId, external_uid: k.id, title: k.title, kind: k.kind, start_date: k.start,
+      end_date: k.end ?? null, leave_days: k.leave ?? null, programme_year: k.year ?? null,
+      notes: k.notes ?? null, updated_at: now,
+    }
+  })
+  if (keyDates.length) {
+    await must(sb.from('mba_key_dates').upsert(keyDates, { onConflict: 'user_id,external_uid' }), 'key dates')
+  }
+  const keepK = new Set(keyDates.map((k) => k.external_uid))
+  const existingK = await must(
+    sb.from('mba_key_dates').select('id, external_uid').eq('user_id', userId),
+    'read key dates',
+  )
+  const staleK = existingK.filter((r) => !keepK.has(r.external_uid)).map((r) => r.id)
+  if (staleK.length) await must(sb.from('mba_key_dates').delete().in('id', staleK), 'prune key dates')
+
   // Drop schedule rows that were removed from the config.
   const keep = new Set(deadlines.map((d) => d.external_uid))
   const existingD = await must(
@@ -294,7 +318,7 @@ for (const [code, list] of byCourse) {
     `${code.padEnd(8)}${String(list.length).padStart(8)}${String(n('reading') + n('book')).padStart(10)}${String(n('slides')).padStart(8)}${String(list.filter((s) => s.summarySource === 'doc').length).padStart(16)}`,
   )
 }
-console.log(`\nDeadlines: ${deadlines.length}`)
+console.log(`\nDeadlines: ${deadlines.length}   Key dates: ${(cfg.keyDates ?? []).length}`)
 if (unmatched.length) {
   console.log(`\nFiles not matched to a session (fine if they're extras):`)
   for (const u of unmatched) console.log(`  · ${u}`)
