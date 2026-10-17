@@ -60,3 +60,6 @@ Thumbs.db
 # misc build output
 dist/
 
+
+# MBA module: personal schedule/config for scripts/mba/sync.mjs (never commit — repo is public)
+.mba/

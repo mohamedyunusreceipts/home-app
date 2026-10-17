@@ -51,6 +51,14 @@ const MORE_ITEMS: MoreItem[] = [
     chipColor: '#C77B5C',
   },
   {
+    label: 'MBA',
+    href: '/mba',
+    // Mortarboard: a diamond cap over a rounded base, with a tassel.
+    icon: 'M2 9l10-5 10 5-10 5zM6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5M22 9v6',
+    chipBg: '#FBF2EE',
+    chipColor: '#C77B5C',
+  },
+  {
     label: 'Salaah',
     href: '/salaah',
     // Crescent moon + a small clock hand — a simple prayer-times glyph.

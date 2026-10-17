@@ -11,16 +11,21 @@ import type { ReactNode } from 'react'
 export function ScreenHeader({
   title,
   action,
+  backHref = '/dashboard',
+  backLabel = 'Back to Today',
 }: {
   title: string
   action?: ReactNode
+  /** Where the chevron goes; defaults to Today. */
+  backHref?: string
+  backLabel?: string
 }) {
   return (
     <header className="flex items-center justify-between pb-4 pt-1.5">
       <div className="flex items-center gap-2">
         <Link
-          href="/dashboard"
-          aria-label="Back to Today"
+          href={backHref}
+          aria-label={backLabel}
           className="-ml-1 flex h-9 w-9 items-center justify-center rounded-full text-[#8a7163] transition-colors hover:bg-cream-200"
         >
           <svg
